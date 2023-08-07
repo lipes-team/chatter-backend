@@ -1,4 +1,3 @@
-import { create } from '../database/abstraction';
 import {
 	Schema,
 	model,
