@@ -1,24 +1,43 @@
 import {
-	Document,
 	Schema,
 	model,
 	InferSchemaType,
-	HydratedDocumentFromSchema,
-	Types,
 	HydratedDocument,
-} from 'mongoose';
+} from '../database/mongoose.imports';
 
 const userSchema = new Schema(
 	{
-		name: { type: String, required: true },
-		password: { type: String, required: true },
-		email: { type: String, required: true, unique: true },
-		groupMembership: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
+		name: {
+			type: String,
+			required: true,
+		},
+		password: {
+			type: String,
+			required: true,
+			select: false,
+		},
+		email: {
+			type: String,
+			required: true,
+			unique: true,
+		},
+		groupMembership: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Group',
+			},
+		],
 		groupSubscription: {
 			type: [
 				{
-					group: { type: Schema.Types.ObjectId, ref: 'Group' },
-					lastSeen: { type: Schema.Types.ObjectId, ref: 'Post' },
+					group: {
+						type: Schema.Types.ObjectId,
+						ref: 'Group',
+					},
+					lastSeen: {
+						type: Schema.Types.ObjectId,
+						ref: 'Post',
+					},
 				},
 			],
 		},

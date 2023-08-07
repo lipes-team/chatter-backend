@@ -1,14 +1,17 @@
-import express from 'express'
-import { allRoutes } from './src/routes'
-import { requestLogger } from './src/utils/logger'
-import { notFound } from './src/routes/notFound.routes'
+import express from 'express';
+import 'dotenv/config';
+import { allRoutes } from './src/routes';
+import { requestLogger } from './src/utils/logger';
+import { connectDB } from './src/database/connection';
 
-const app = express()
+connectDB();
 
-app.use(requestLogger)
+const app = express();
 
-app.use(express.json())
+app.use(requestLogger);
 
-app.use('/', allRoutes)
+app.use(express.json());
 
-export { app }
+app.use('/', allRoutes);
+
+export { app };

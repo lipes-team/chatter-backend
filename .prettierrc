@@ -1,9 +1,8 @@
 {
-  "singleQuote": true,
-  "semi": true,
-  "arrowParens": "always",
-  "useTabs": true,
-  "singleAttributePerLine": true,
-  "embeddedLanguageFormatting": "auto"
+	"singleQuote": true,
+	"semi": true,
+	"arrowParens": "always",
+	"useTabs": true,
+	"singleAttributePerLine": true,
+	"embeddedLanguageFormatting": "auto"
 }
-
