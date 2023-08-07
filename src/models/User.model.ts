@@ -1,9 +1,11 @@
+import { create } from '../database/abstraction';
 import {
 	Schema,
 	model,
 	InferSchemaType,
 	HydratedDocument,
 } from '../database/mongoose.imports';
+import { Timestamps } from '../utils/types';
 
 const userSchema = new Schema(
 	{
@@ -21,12 +23,12 @@ const userSchema = new Schema(
 			required: true,
 			unique: true,
 		},
-		groupMembership: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: 'Group',
-			},
-		],
+		groupMembership: {
+			type: [Schema.Types.ObjectId],
+			ref: 'Group',
+			required: false,
+		},
+
 		groupSubscription: {
 			type: [
 				{
@@ -40,6 +42,7 @@ const userSchema = new Schema(
 					},
 				},
 			],
+			required: false,
 		},
 	},
 	{ timestamps: true }
