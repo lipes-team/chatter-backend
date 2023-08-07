@@ -13,3 +13,8 @@ type ErrorOpts = {
 	message: string;
 	status: number;
 };
+
+export type Timestamps = {
+	createdAt: NativeDate;
+	updatedAt: NativeDate;
+};
