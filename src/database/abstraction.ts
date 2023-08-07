@@ -36,7 +36,7 @@ export const findOne = <TModel>(
 	return model.findOne(filter, {}, options);
 };
 
-type UpdateOptions<TModel> = UpdateQuery<TModel> | Partial<TModel>
+type UpdateOptions<TModel> = UpdateQuery<TModel> | Partial<TModel>;
 
 export const update = <TModel>(
 	model: Model<TModel>,
@@ -46,7 +46,3 @@ export const update = <TModel>(
 ) => {
 	return model.findOneAndUpdate(filter, updateData, options);
 };
-
-type MongooseAbs<TModel> = (	
-  model: Model<TModel>
-  filter: FilterOptions<TModel>)
