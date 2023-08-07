@@ -11,6 +11,7 @@ import {
 	Model,
 	FilterQuery,
 	QueryOptions,
+	UpdateQuery,
 } from 'mongoose';
 
 export {
@@ -26,4 +27,5 @@ export {
 	Model,
 	FilterQuery,
 	QueryOptions,
+	UpdateQuery,
 };
