@@ -5,6 +5,7 @@ import {
 	InferSchemaType,
 	HydratedDocumentFromSchema,
 	Types,
+	HydratedDocument,
 } from 'mongoose';
 
 const userSchema = new Schema(
@@ -26,3 +27,7 @@ const userSchema = new Schema(
 );
 
 type User = InferSchemaType<typeof userSchema>;
+type UserHydrated = HydratedDocument<typeof userSchema>;
+const userModel = model<User>('User', userSchema);
+
+export { userModel, UserHydrated, User };
