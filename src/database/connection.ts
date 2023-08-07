@@ -8,6 +8,7 @@ export const connectDB = async () => {
 	try {
 		const {
 			connection: { name },
+			// TODO: check if we can/should change the timeout
 		} = await connect(MONGODB, { autoIndex: isDev, socketTimeoutMS: 0 });
 		logger.info(`Connect to ${name} database`);
 	} catch (error) {
@@ -16,7 +17,7 @@ export const connectDB = async () => {
 };
 
 export const disconnection = async () => {
-	await disconnect(); // ?
+	await disconnect();
 	logger.info('Closed connection to the database');
 	process.exit(1);
 };
