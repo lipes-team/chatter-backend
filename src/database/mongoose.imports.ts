@@ -9,6 +9,8 @@ import {
 	connect,
 	disconnect,
 	Model,
+	FilterQuery,
+	QueryOptions,
 } from 'mongoose';
 
 export {
@@ -22,4 +24,6 @@ export {
 	connect,
 	disconnect,
 	Model,
+	FilterQuery,
+	QueryOptions,
 };
