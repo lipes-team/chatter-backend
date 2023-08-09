@@ -19,6 +19,9 @@ describe('Mongoose Abstraction', () => {
 	});
 
 	afterAll(async () => {
+		if (database) {
+			await database.dropDatabase();
+		}
 		await disconnectDB();
 	});
 
@@ -30,8 +33,12 @@ describe('Mongoose Abstraction', () => {
 	});
 
 	it('find abstraction', async () => {
-		const testUser = await find(Model, { name: userTestData.name });
+		const testUser = await find(Model, { name: userTestData.name }).select(
+			'+password'
+		);
 
-		expect(testUser).toMatchObject(userTestData);
+		expect(testUser[0]).toMatchObject(userTestData);
 	});
+
+	it('', async () => {});
 });
