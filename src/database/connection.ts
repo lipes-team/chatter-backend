@@ -7,17 +7,20 @@ const isDev = process.env.NODE_ENV === 'dev';
 export const connectDB = async () => {
 	try {
 		const {
-			connection: { name },
+			connection,
 			// TODO: check if we can/should change the timeout
 		} = await connect(MONGODB, { autoIndex: isDev, socketTimeoutMS: 0 });
-		logger.info(`Connect to ${name} database`);
+
+		logger.info(`Connect to ${connection.name} database`);
+
+		return connection;
 	} catch (error) {
 		logger.error(error);
 	}
 };
 
-export const disconnection = async () => {
+export const disconnectDB = async () => {
 	await disconnect();
 	logger.info('Closed connection to the database');
-	process.exit(1);
+	/* process.exit(1); */ // this prevents JEST from running tests
 };
