@@ -9,12 +9,12 @@ import {
 	UpdateQuery,
 } from './mongoose.imports';
 
-type NoTimestamps<TModel> = Omit<TModel, keyof Timestamps>;
+type NoTimestamps<TModel> = Partial<Omit<TModel, keyof Timestamps>>; //added Partial to make groups optional
 type FilterOptions<TModel> = FilterQuery<TModel> & { _id?: string };
 
 export const addToDb = <TModel>(
 	model: Model<TModel>,
-	newObject: NoTimestamps<TModel>
+	newObject: NoTimestamps<TModel> | NoTimestamps<TModel>[] // changed to array of objects
 ) => {
 	return model.create(newObject);
 };
