@@ -12,6 +12,7 @@ import {
 	FilterQuery,
 	QueryOptions,
 	UpdateQuery,
+	Connection,
 } from 'mongoose';
 
 export {
@@ -28,4 +29,5 @@ export {
 	FilterQuery,
 	QueryOptions,
 	UpdateQuery,
+	Connection,
 };
