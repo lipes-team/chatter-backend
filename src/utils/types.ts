@@ -5,7 +5,7 @@ export type RouteOpts = {
 	req: Request;
 	res: Response;
 	next: NextFunction;
-	payload?: Request & {}; // add the payload
+	payload: Request; // add the payload
 };
 
 type ErrorOpts = {
