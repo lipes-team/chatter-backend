@@ -12,6 +12,7 @@ import {
 type NoTimestamps<TModel> = Partial<Omit<TModel, keyof Timestamps>>; //added Partial to make groups optional
 export type FilterOptions<TModel> = FilterQuery<TModel> & { _id?: string };
 export type UpdateOptions<TModel> = UpdateQuery<TModel> | Partial<TModel>;
+export type OptionsQuery<TModel> = QueryOptions<TModel>;
 
 export const addToDb = <TModel>(
 	model: Model<TModel>,

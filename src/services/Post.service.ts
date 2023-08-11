@@ -7,12 +7,12 @@ import {
 	update,
 	FilterOptions,
 	UpdateOptions,
+	OptionsQuery,
 } from '../database/abstraction';
-import { QueryOptions } from 'mongoose';
 
 type Filter = FilterOptions<Post>;
 type Update = UpdateOptions<Post>;
-type Options = QueryOptions<Post>;
+type Options = OptionsQuery<Post>;
 
 class PostService {
 	async createPost(newPost: Post) {
