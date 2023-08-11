@@ -10,7 +10,8 @@ import {
 } from './mongoose.imports';
 
 type NoTimestamps<TModel> = Partial<Omit<TModel, keyof Timestamps>>; //added Partial to make groups optional
-type FilterOptions<TModel> = FilterQuery<TModel> & { _id?: string };
+export type FilterOptions<TModel> = FilterQuery<TModel> & { _id?: string };
+export type UpdateOptions<TModel> = UpdateQuery<TModel> | Partial<TModel>;
 
 export const addToDb = <TModel>(
 	model: Model<TModel>,
@@ -35,8 +36,6 @@ export const findOne = <TModel>(
 ) => {
 	return model.findOne(filter, {}, options);
 };
-
-type UpdateOptions<TModel> = UpdateQuery<TModel> | Partial<TModel>;
 
 export const update = <TModel>(
 	model: Model<TModel>,
