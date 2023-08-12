@@ -1,44 +1,59 @@
 import { Connection } from 'mongoose';
+import { Express } from 'express';
 
-import { PostRoute } from '../src/routes/post.routes';
-import { connectDB, disconnectDB } from '../src/database/connection';
-import { logger } from '../src/utils/logger';
+import { disconnectDB } from '../src/database/connection';
 import {
 	getRequest,
 	postRequest,
 	putRequest,
 	deleteRequest,
+	RequestTypes,
 } from './utils/requestAbstraction';
-import { expected } from './utils/expectAbstractions';
+import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
+import { logger } from '../src/utils/logger';
+import { initializeApp } from '../app';
 
 describe('Posts Controller', () => {
 	let database: Connection | undefined;
-
+	let app: Express | undefined;
 	beforeAll(async () => {
-		database = await connectDB();
+		try {
+			const { app: application, db } = await initializeApp();
+			database = db;
+			app = application;
+		} catch (error) {
+			logger.error(error);
+			// TODO: should throw an error here too?
+		}
 	});
 
 	afterAll(async () => {
-		if (database) {
-			await database.db.dropDatabase();
+		try {
+			await database?.db.dropDatabase();
+			await disconnectDB();
+		} catch (error) {
+			logger.error(error);
 		}
-		await disconnectDB();
 	});
 
 	it('POST/should create a new post', async () => {
 		const infoSend = {
-			text: 'This is the post test',
-			owner: 'Felipe',
-			image:
-				'https://res.cloudinary.com/dx2ymjepk/image/upload/v1690986732/remote-office/rp3wjqkx0t0w7rqdviz1.jpg',
+			title: 'This is the post test',
 		};
-		const route = '/api/posts';
+		const route = '/post';
 
-		try {
-			const res = await postRequest({ infoSend, route });
-			expected<typeof infoSend>(res, 201, infoSend);
-		} catch (error: any) {
-			logger.error(error);
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 201);
+			expectResponseBody(res, infoSend);
 		}
 	});
+
+	// it("POST/shouldn't create a new post", async () => {
+	// 	const infoSend = {};
+	// 	const route = '/post';
+
+	// 	const res = await postRequest({ infoSend, route });
+	// 	expected<typeof infoSend>(res, 500, infoSend);
+	// });
 });
