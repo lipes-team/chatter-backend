@@ -1,60 +1,41 @@
-import request from 'supertest';
-import { app } from '../../app';
+import request, { Response } from 'supertest';
+import { Express } from 'express';
 
-type RequestTypes = {
+export type RequestTypes = {
+	app: Express;
 	infoSend: string | object;
 	route: string;
 	header?: {};
 };
 
-export const getRequest = async ({ infoSend, route, header }: RequestTypes) => {
-	let res;
+const makeRequest = (
+	app: Express,
+	method: 'get' | 'put' | 'delete' | 'post',
+	{ infoSend, route, header }: RequestTypes
+): Promise<Response> => {
+	let req = request(app)[method](route);
+
 	if (header) {
-		res = await request(app).get(route).set(header).send(infoSend);
-	} else {
-		res = await request(app).get(route).send(infoSend);
+		req.set(header);
 	}
 
-	return res;
+	return req.send(infoSend);
 };
 
-export const postRequest = async ({
-	infoSend,
-	route,
-	header,
-}: RequestTypes) => {
-	let res;
-	if (header) {
-		res = await request(app).post(route).set(header).send(infoSend);
-	} else {
-		res = await request(app).post(route).send(infoSend);
-	}
-
-	return res;
+export const getRequest = async (options: RequestTypes): Promise<Response> => {
+	return makeRequest(options.app, 'get', options);
 };
 
-export const putRequest = async ({ infoSend, route, header }: RequestTypes) => {
-	let res;
-	if (header) {
-		res = await request(app).put(route).set(header).send(infoSend);
-	} else {
-		res = await request(app).put(route).send(infoSend);
-	}
-
-	return res;
+export const postRequest = async (options: RequestTypes): Promise<Response> => {
+	return makeRequest(options.app, 'post', options);
 };
 
-export const deleteRequest = async ({
-	infoSend,
-	route,
-	header,
-}: RequestTypes) => {
-	let res;
-	if (header) {
-		res = await request(app).delete(route).set(header).send(infoSend);
-	} else {
-		res = await request(app).delete(route).send(infoSend);
-	}
+export const putRequest = async (options: RequestTypes): Promise<Response> => {
+	return makeRequest(options.app, 'put', options);
+};
 
-	return res;
+export const deleteRequest = async (
+	options: RequestTypes
+): Promise<Response> => {
+	return makeRequest(options.app, 'delete', options);
 };
