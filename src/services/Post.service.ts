@@ -15,7 +15,7 @@ type Update = UpdateOptions<Post>;
 type Options = OptionsQuery<Post>;
 
 class PostService {
-	async createPost(newPost: Post) {
+	async createPost(newPost: Partial<Post>) {
 		return addToDb(postModel, newPost);
 	}
 
