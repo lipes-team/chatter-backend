@@ -1,12 +1,15 @@
 import { Response } from 'supertest';
 
-export const expected = <Expected extends {} | any[]>(
+type ResponseBody<Expected> = Expected extends Array<infer T> ? T : Expected;
+
+export const expectStatus = (res: Response, status: number) => {
+	expect(res.status).toEqual(status);
+};
+
+export const expectResponseBody = <Expected extends {}>(
 	res: Response,
-	resStatus: number,
-	expectedObject: {}
+	expectedObject: Expected
 ) => {
-	expect(res.status).toEqual(resStatus);
-	expect(res.body).toMatchObject<Expected>(
-		expect.objectContaining(expectedObject)
-	);
+	const responseBody = res.body as ResponseBody<Expected>;
+	expect(responseBody).toMatchObject(expectedObject);
 };
