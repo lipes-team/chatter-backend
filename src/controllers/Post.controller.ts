@@ -1,3 +1,4 @@
+import { Post } from '../models/Post.model';
 import { postService } from '../services/Post.service';
 import { RouteOpts } from '../utils/types';
 
@@ -8,8 +9,15 @@ class PostController {
 		next: RouteOpts['next']
 	) {
 		try {
-			const { title } = req.body;
-			const newPost = await postService.createPost({ title });
+			const { title }: Post = req.body;
+			if (!title) {
+				const error = {
+					message: 'Title required',
+					status: 400,
+				};
+				throw error;
+			}
+			const newPost = await postService.createPost({ title: title! });
 			return res.status(201).json(newPost);
 		} catch (error: any) {
 			error.path = 'Create a new Post';
