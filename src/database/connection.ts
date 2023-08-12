@@ -6,10 +6,11 @@ const isDev = process.env.NODE_ENV === 'dev';
 
 export const connectDB = async () => {
 	try {
-		const {
-			connection,
-			// TODO: check if we can/should change the timeout
-		} = await connect(MONGODB, { autoIndex: isDev, socketTimeoutMS: 0 });
+		// TODO: check if we can/should change the timeout
+		const { connection } = await connect(MONGODB, {
+			autoIndex: isDev,
+			socketTimeoutMS: 0,
+		});
 
 		logger.info(`Connect to ${connection.name} database`);
 
