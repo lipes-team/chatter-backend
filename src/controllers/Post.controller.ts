@@ -10,13 +10,6 @@ class PostController {
 	) {
 		try {
 			const { title }: Post = req.body;
-			if (!title) {
-				const error = {
-					message: 'Title required',
-					status: 400,
-				};
-				throw error;
-			}
 			const newPost = await postService.createPost({ title: title! });
 			return res.status(201).json(newPost);
 		} catch (error: any) {
