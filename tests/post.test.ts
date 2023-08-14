@@ -49,11 +49,25 @@ describe('Posts Controller', () => {
 		}
 	});
 
-	// it("POST/shouldn't create a new post", async () => {
-	// 	const infoSend = {};
-	// 	const route = '/post';
+	it("POST/shouldn't create a new post", async () => {
+		const infoSend = {};
+		const route = '/post';
+		const error = {
+			errors: [
+				{
+					message: 'Required',
+					expected: 'string',
+					received: 'undefined',
+					path: ['body', 'title'],
+				},
+			],
+			path: 'Validation',
+		};
 
-	// 	const res = await postRequest({ infoSend, route });
-	// 	expected<typeof infoSend>(res, 500, infoSend);
-	// });
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
+			expectResponseBody(res, error);
+		}
+	});
 });
