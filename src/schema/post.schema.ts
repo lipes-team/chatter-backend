@@ -3,7 +3,7 @@ import z from 'zod';
 
 export const createPostSchema = z.object({
 	body: z.object({
-		title: z.string(),
+		title: z.string().nonempty(),
 		// TODO: This will change after the post base being added
 		postInfo: z.string().array().optional(),
 	}),
