@@ -1,22 +1,27 @@
 import { logger } from '../utils/logger';
 import { RouteOpts } from '../utils/types';
 
-const errorHandling = (error: RouteOpts['error'], res: RouteOpts['res']) => {
+const formatError = (error: RouteOpts['error']) => {
 	if (error.issues) {
-		logger.error(error.issues);
-		const errors = error.issues.map((error) => ({
+		return error.issues.map((error) => ({
 			message: error.message,
 			expected: error.expected,
 			received: error.received,
 			path: error.path,
 		}));
-		return res.status(error.status || 500).json({ errors, path: error.path });
 	}
+	return [{ message: error.message || 'Some error happened' }];
+};
 
-	logger.error(error);
-	return res
-		.status(error.status || 500)
-		.json(error.message || { message: 'Some error happened' });
+const errorHandling = (error: RouteOpts['error'], res: RouteOpts['res']) => {
+	const statusCode = error.status || 500;
+	const responseBody = {
+		errors: formatError(error),
+		path: error.path,
+	};
+
+	logger.error(responseBody);
+	return res.status(statusCode).json(responseBody);
 };
 
 export { errorHandling };
