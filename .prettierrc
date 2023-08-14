@@ -4,5 +4,6 @@
 	"arrowParens": "always",
 	"useTabs": true,
 	"singleAttributePerLine": true,
-	"embeddedLanguageFormatting": "auto"
+	"embeddedLanguageFormatting": "auto",
+	"quoteProps": "preserve"
 }
