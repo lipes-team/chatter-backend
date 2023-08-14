@@ -20,6 +20,7 @@ export const validateSchema =
 			next();
 		} catch (error: any) {
 			error.path = 'Validation';
+			error.status = 400;
 			next(error);
 		}
 	};
