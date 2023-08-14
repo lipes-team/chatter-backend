@@ -12,6 +12,12 @@ type ErrorOpts = {
 	path: string; // place? path? location?
 	message: string;
 	status: number;
+	issues?: {
+		message: any;
+		expected: string;
+		received: string;
+		path: string[];
+	}[];
 };
 
 export type Timestamps = {
