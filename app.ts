@@ -3,7 +3,6 @@ import 'dotenv/config';
 import { allRoutes } from './src/routes';
 import { requestLogger } from './src/utils/logger';
 import { connectDB } from './src/database/connection';
-import { Connection } from './src/database/mongoose.imports';
 
 const initializeApp = async () => {
 	const db = await connectDB();
