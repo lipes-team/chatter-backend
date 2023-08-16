@@ -1,4 +1,5 @@
 import { Schema, model, InferSchemaType, Model } from 'mongoose';
+import { Schema, model, InferSchemaType } from 'mongoose';
 
 const userSchema = new Schema(
 	{
@@ -42,7 +43,7 @@ const userSchema = new Schema(
 );
 
 type User = InferSchemaType<typeof userSchema>;
-type UserModel = Model<User>;
+
 const userModel = model<User>('User', userSchema);
 
-export { userModel, User, UserModel };
+export { userModel, User };
