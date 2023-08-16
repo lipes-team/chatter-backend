@@ -1,4 +1,3 @@
-import { Schema, model, InferSchemaType, Model } from 'mongoose';
 import { Schema, model, InferSchemaType } from 'mongoose';
 
 const userSchema = new Schema(
