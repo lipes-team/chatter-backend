@@ -24,3 +24,5 @@ export type Timestamps = {
 	createdAt: NativeDate;
 	updatedAt: NativeDate;
 };
+
+export type Remover<T, K extends keyof T> = Omit<T, K>;

@@ -3,7 +3,7 @@ import { Timestamps } from '../utils/types';
 
 export type NewResource<TModel, KeysToChange extends keyof TModel> = Omit<
 	TModel,
-	KeysToChange | keyof Timestamps
+	KeysToChange
 > & {
 	[key in KeysToChange]?: TModel[key] extends Array<infer TArray>
 		? TArray[] extends Types.ObjectId[]
