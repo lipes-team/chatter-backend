@@ -3,7 +3,9 @@ import {
 	model,
 	InferSchemaType,
 	HydratedDocument,
+	Model,
 } from '../database/mongoose.imports';
+
 import { Timestamps } from '../utils/types';
 
 const userSchema = new Schema(
@@ -48,7 +50,7 @@ const userSchema = new Schema(
 );
 
 type User = InferSchemaType<typeof userSchema>;
-type UserHydrated = HydratedDocument<typeof userSchema>;
+type UserModel = Model<User>;
 const userModel = model<User>('User', userSchema);
 
-export { userModel, UserHydrated, User };
+export { userModel, User, UserModel };
