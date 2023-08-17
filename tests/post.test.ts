@@ -38,14 +38,26 @@ describe('Posts Controller', () => {
 
 	it('POST/should create a new post', async () => {
 		const infoSend = {
-			title: 'This is the post test',
+			postBody: {
+				title: 'This is the post test',
+				text: 'Text example',
+			},
 		};
 		const route = '/post';
+
+		const expecxtRes = {
+			__v: expect.any(Number),
+			_id: expect.any(String),
+			comments: expect.any(Array<String>),
+			createdAt: expect.any(String),
+			postInfo: expect.any(Array<String>),
+			updatedAt: expect.any(String),
+		};
 
 		if (app) {
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 201);
-			expectResponseBody(res, infoSend);
+			expectResponseBody(res, expecxtRes);
 		}
 	});
 
@@ -56,9 +68,9 @@ describe('Posts Controller', () => {
 			errors: [
 				{
 					message: 'Required',
-					expected: 'string',
+					expected: 'object',
 					received: 'undefined',
-					path: ['body', 'title'],
+					path: ['body', 'postBody'],
 				},
 			],
 			path: 'Validation',
