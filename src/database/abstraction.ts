@@ -12,7 +12,9 @@ export type NewResource<TModel, KeysToChange extends keyof TModel> = Omit<
 		: undefined;
 	};
 
-export type FilterOptions<TModel> = FilterQuery<TModel> & { _id?: string };
+export type FilterOptions<TModel> = FilterQuery<TModel> & {
+	_id?: string | Types.ObjectId | Types.ObjectId[];
+};
 export type UpdateOptions<TModel> = UpdateQuery<TModel> | Partial<TModel>;
 export type OptionsQuery<TModel> = QueryOptions<TModel>;
 
