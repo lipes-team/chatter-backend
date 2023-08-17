@@ -1,12 +1,14 @@
-import mongoose from 'mongoose';
 import z from 'zod';
 
 export const createPostSchema = z.object({
 	body: z.object({
-		title: z.string().nonempty(),
-		// TODO: This will change after the post base being added
-		postInfo: z.string().array().optional(),
+		postBody: z.object({
+			title: z.string().nonempty(),
+			status: z
+				.enum(['pending', 'live', 'past', 'inReview'])
+				.default('pending'),
+			text: z.string().nonempty(),
+			image: z.string().nonempty().optional(),
+		}),
 	}),
 });
-// TODO: This will be a validation for the objectId
-//.refine(data => mongoose.isValidObjectId(data.postInfo))
