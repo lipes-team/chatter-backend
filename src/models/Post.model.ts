@@ -1,6 +1,6 @@
 import { Schema, model, InferSchemaType, Model } from 'mongoose';
 
-import { OptionalArrays, RequiredArrays } from '../database/abstraction';
+import { NewResource } from '../database/abstraction';
 import { Remover, Timestamps } from '../utils/types';
 
 const postSchema = new Schema(
