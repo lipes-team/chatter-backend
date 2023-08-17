@@ -2,7 +2,6 @@ import { Connection, Types } from 'mongoose';
 import { connectDB, disconnectDB } from '../src/database/connection';
 import { userModel } from '../src/models/User.model';
 import { postBodyService } from '../src/services/PostBody.service';
-import { logger } from '../src/utils/logger';
 import { postModel } from '../src/models/Post.model';
 
 describe('Post Body Services', () => {
@@ -28,9 +27,11 @@ describe('Post Body Services', () => {
 		await disconnectDB();
 	});
 
-	test('Create postBody', async () => {
+	test('Create postBody with the default status as pending', async () => {
 		const newBody = await postBodyService.createPostBody(postBody);
-		expect(newBody).toEqual(expect.objectContaining(postBody));
+		expect(newBody).toEqual(
+			expect.objectContaining({ ...postBody, status: 'pending' })
+		);
 	});
 
 	test('should error when trying to create a postBody without title', async () => {
