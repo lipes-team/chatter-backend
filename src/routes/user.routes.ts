@@ -6,6 +6,6 @@ import { userController } from '../controllers/User.controller';
 
 const router = Router();
 
-router.post('/', validateSchema(createUserSchema), userController.create);
+router.post('/signup', validateSchema(createUserSchema), userController.create);
 
 export { router as userRoutes };
