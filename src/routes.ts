@@ -4,6 +4,7 @@ import { notFound } from './routes/notFound.routes';
 import { errorHandling } from './routes/errorHandling.routes';
 import { RouteOpts } from './utils/types';
 import { postRoutes } from './routes/post.routes';
+import { userRoutes } from './routes/user.routes';
 
 const router = Router();
 
@@ -20,6 +21,8 @@ router.get('/', (req, res, next) => {
 router.use('/auth', authRoutes);
 
 router.use('/post', postRoutes);
+
+router.use('/user', userRoutes);
 
 router.use(
 	(
