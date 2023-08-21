@@ -12,10 +12,10 @@ import {
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
 import { logger } from '../src/utils/logger';
 import { initializeApp } from '../app';
-import { findOne } from '../src/database/abstraction';
+import { findOne, find, addToDb } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
 
-describe('POST /users/signup', () => {
+describe.only('POST /users/signup', () => {
 	let database: Connection | undefined;
 	let app: Express | undefined;
 	beforeAll(async () => {
@@ -23,6 +23,15 @@ describe('POST /users/signup', () => {
 			const { app: application, db } = await initializeApp();
 			database = db;
 			app = application;
+			await userModel.ensureIndexes(); //ensure mongoose validation based on userModel
+
+			let userInfo = {
+				name: 'Jane Doe',
+				password: 'TestTest123',
+				email: 'janedoe@email.com',
+			};
+
+			let user = await addToDb(userModel, userInfo);
 		} catch (error) {
 			logger.error(error);
 			// TODO: should throw an error here too?
@@ -77,7 +86,7 @@ describe('POST /users/signup', () => {
 		}
 	});
 
-	it('Check if name and email are unique in DB', async () => {
+	it('400 error and simple message if email is not unique', async () => {
 		const infoSend = {
 			name: 'Jane Doe',
 			password: 'TestTest123', //valid password
@@ -85,20 +94,15 @@ describe('POST /users/signup', () => {
 		};
 		const route = '/user/signup';
 
-		//Mongoose method for getting the number of documents that matches this filter
-		let uniqueNameCount = await userModel.countDocuments({
-			name: infoSend.name,
-		});
-		let uniqueEmailCount = await userModel.countDocuments({
-			email: infoSend.email,
-		});
+		await find(userModel, { email: infoSend.email });
 
-		// expect them to be 0
-		expect(uniqueNameCount).toBe(0);
-		expect(uniqueEmailCount).toBe(0);
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
+		}
 	});
 
-	it.todo('should encrypt recieved password');
+	it.todo('Password in db should be encripted');
 
 	it.todo('should create new user with encrypted password');
 });

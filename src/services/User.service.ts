@@ -25,6 +25,10 @@ class UserService {
 	async createUser(newUser: UserData) {
 		return addToDb(this.userModel, newUser);
 	}
+
+	async checkUnique(newUser: UserData) {
+		return findOne(this.userModel, newUser);
+	}
 }
 
 export const userService = new UserService();
