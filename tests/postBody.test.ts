@@ -23,7 +23,9 @@ describe('Post Body Services', () => {
 	});
 
 	afterAll(async () => {
-		await database?.db.dropDatabase();
+		if (database) {
+			await database.db.dropDatabase();
+		}
 		await disconnectDB();
 	});
 
