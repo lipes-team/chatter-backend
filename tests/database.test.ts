@@ -56,7 +56,7 @@ describe('Mongoose Abstraction', () => {
 			logger.error(error);
 		}
 	});
-
+	// TODO: Add test to find without filter
 	it('find one abstraction', async () => {
 		try {
 			const testUser = await findOne(Model, { name: userTestData.name }).select(

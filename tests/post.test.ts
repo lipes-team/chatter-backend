@@ -29,7 +29,9 @@ describe('Posts Controller', () => {
 
 	afterAll(async () => {
 		try {
-			await database?.db.dropDatabase();
+			if (database) {
+				await database.db.dropDatabase();
+			}
 			await disconnectDB();
 		} catch (error) {
 			logger.error(error);
