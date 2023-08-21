@@ -7,7 +7,7 @@ export type NewResource<TModel, KeysToChange extends keyof TModel> = Omit<
 > & {
 		[key in KeysToChange]?: TModel[key] extends Array<infer TArray>
 		? TArray[] extends Types.ObjectId[]
-		? string[]
+		? string[] | string | Types.ObjectId[] | Types.ObjectId
 		: TArray[]
 		: undefined;
 	};
