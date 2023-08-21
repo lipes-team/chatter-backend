@@ -102,7 +102,22 @@ describe.only('POST /users/signup', () => {
 		}
 	});
 
-	it.todo('Password in db should be encripted');
+	it('Password in db should be encripted', async () => {
+		const userInfo = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'janedoe@email.com',
+		};
+
+		let savedUser = await findOne(userModel, { email: userInfo.email }).select(
+			'+password'
+		);
+
+		console.log(savedUser, userInfo);
+		if (savedUser?.password) {
+			expect(userInfo.password).not.toBe(savedUser.password);
+		}
+	});
 
 	it.todo('should create new user with encrypted password');
 });
