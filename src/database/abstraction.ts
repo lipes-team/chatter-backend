@@ -1,6 +1,7 @@
 import { FilterQuery, Types, UpdateQuery, QueryOptions, Model } from 'mongoose';
 import { Timestamps } from '../utils/types';
 
+// making mongoose infering optional for arrays (mongoose oversight)
 export type NewResource<TModel, KeysToChange extends keyof TModel> = Omit<
 	TModel,
 	KeysToChange
