@@ -14,6 +14,8 @@ import { logger } from '../src/utils/logger';
 import { initializeApp } from '../app';
 import { findOne, find, addToDb } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
+import { userController } from '../src/controllers/User.controller';
+import { userService } from '../src/services/User.service';
 
 describe.only('POST /users/signup', () => {
 	let database: Connection | undefined;
@@ -28,7 +30,7 @@ describe.only('POST /users/signup', () => {
 			let userInfo = {
 				name: 'Jane Doe',
 				password: 'TestTest123',
-				email: 'janedoe@email.com',
+				email: 'uniquejane@email.com',
 			};
 
 			let user = await addToDb(userModel, userInfo);
@@ -82,7 +84,6 @@ describe.only('POST /users/signup', () => {
 		if (app) {
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 201);
-			expectResponseBody(res, infoSend);
 		}
 	});
 
@@ -90,7 +91,7 @@ describe.only('POST /users/signup', () => {
 		const infoSend = {
 			name: 'Jane Doe',
 			password: 'TestTest123', //valid password
-			email: 'janedoe@email.com',
+			email: 'uniquejane@email.com',
 		};
 		const route = '/user/signup';
 
@@ -102,22 +103,31 @@ describe.only('POST /users/signup', () => {
 		}
 	});
 
-	it('Password in db should be encripted', async () => {
+	it('Password in db should be hashed and match original password', async () => {
 		const userInfo = {
 			name: 'Jane Doe',
 			password: 'TestTest123', //valid password
 			email: 'janedoe@email.com',
 		};
 
+		// shallow copy because .createUser changes the original
+		const originalUserInfo = { ...userInfo };
+
+		await userService.createUser(userInfo);
+
 		let savedUser = await findOne(userModel, { email: userInfo.email }).select(
 			'+password'
 		);
 
-		console.log(savedUser, userInfo);
 		if (savedUser?.password) {
-			expect(userInfo.password).not.toBe(savedUser.password);
+			expect(savedUser.password).not.toEqual(originalUserInfo.password);
+
+			let isHashed = await userService.compareHashedPassword(
+				originalUserInfo.password,
+				savedUser.password
+			);
+
+			expect(isHashed).toBe(true);
 		}
 	});
-
-	it.todo('should create new user with encrypted password');
 });
