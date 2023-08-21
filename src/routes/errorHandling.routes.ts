@@ -10,7 +10,12 @@ const formatError = (error: RouteOpts['error']) => {
 			path: error.path,
 		}));
 	}
-	return [{ message: error.message || 'Some error happened' }];
+	return [
+		{
+			message: error.message || 'Some error happened',
+			path: error.path,
+		},
+	];
 };
 
 const errorHandling = (error: RouteOpts['error'], res: RouteOpts['res']) => {
