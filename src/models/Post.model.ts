@@ -24,8 +24,8 @@ const postSchema = new Schema(
 type Post = InferSchemaType<typeof postSchema>;
 type PostModel = Model<Post>;
 
-type OptionalArrays = NewResource<Post, 'comments'>;
-type NewPost = Remover<OptionalArrays, 'createdAt' | 'updatedAt'>;
+type OptionalArrays = NewResource<Post, 'comments' | 'postInfo'>;
+type NewPost = Remover<OptionalArrays, keyof Timestamps>;
 
 const postModel = model('Post', postSchema);
 
