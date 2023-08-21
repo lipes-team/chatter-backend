@@ -13,8 +13,7 @@ class PostController {
 		try {
 			const { postBody } = req.body;
 			const newBody = await postBodyService.createPostBody(postBody);
-			const postInfo = [newBody._id];
-			const newPost = await postService.createPost({ postInfo });
+			const newPost = await postService.createPost({ postInfo: newBody._id });
 			return res.status(201).json(newPost);
 		} catch (error: any) {
 			error.path = 'Create a new Post';
