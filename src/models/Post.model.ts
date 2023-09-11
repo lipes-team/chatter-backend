@@ -1,6 +1,6 @@
 import { Schema, model, InferSchemaType, Model } from 'mongoose';
 
-import { NewResource } from '../database/abstraction';
+import { OptionalArrays, RequiredArrays } from '../database/abstraction';
 import { Remover, Timestamps } from '../utils/types';
 
 const postSchema = new Schema(
@@ -24,8 +24,9 @@ const postSchema = new Schema(
 type Post = InferSchemaType<typeof postSchema>;
 type PostModel = Model<Post>;
 
-type OptionalArrays = NewResource<Post, 'comments' | 'postInfo'>;
-type NewPost = Remover<OptionalArrays, keyof Timestamps>;
+type OptionalPost = OptionalArrays<Post, 'comments'>;
+type Required = RequiredArrays<OptionalPost, 'postInfo'>;
+type NewPost = Remover<Required, keyof Timestamps>;
 
 const postModel = model('Post', postSchema);
 
