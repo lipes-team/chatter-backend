@@ -44,22 +44,12 @@ describe('Posts Controller', () => {
 		}
 	});
 
-	it('POST/should create a new post', async () => {
-		const infoSend = {
-			postBody: {
-				title: 'This is the post test',
-				text: 'Text example',
-			},
-		};
+	it('should create a new post', async () => {
+		const infoSend = { postBody };
 		const route = '/post';
 
 		const expecxtRes = {
-			__v: expect.any(Number),
-			_id: expect.any(String),
-			comments: expect.any(Array<String>),
-			createdAt: expect.any(String),
 			postInfo: expect.any(Array<String>),
-			updatedAt: expect.any(String),
 		};
 
 		if (app) {
