@@ -8,13 +8,18 @@ import {
 	FilterOptions,
 	UpdateOptions,
 	OptionsQuery,
-	NoTimestamps,
+	OptionalArrays,
 } from '../database/abstraction';
+import { Remover, Timestamps } from '../utils/types';
 
 type Filter = FilterOptions<User>;
 type Update = UpdateOptions<User>;
 type Options = OptionsQuery<User>;
-type UserData = NoTimestamps<User>;
+type UserData = Remover<User, keyof Timestamps>;
+type NewUser = OptionalArrays<
+	UserData,
+	'groupMembership' | 'groupSubscription'
+>;
 
 class UserService {
 	userModel: UserModel;
@@ -22,7 +27,7 @@ class UserService {
 	constructor() {
 		this.userModel = userModel;
 	}
-	async createUser(newUser: UserData) {
+	async createUser(newUser: NewUser) {
 		return addToDb(this.userModel, newUser);
 	}
 }

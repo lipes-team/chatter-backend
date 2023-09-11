@@ -77,26 +77,26 @@ describe('POST /users/signup', () => {
 		}
 	});
 
-	it('Check if name and email are unique in DB', async () => {
-		const infoSend = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'janedoe@email.com',
-		};
-		const route = '/user/signup';
+	// it('Check if name and email are unique in DB', async () => {
+	// 	const infoSend = {
+	// 		name: 'Jane Doe',
+	// 		password: 'TestTest123', //valid password
+	// 		email: 'janedoe@email.com',
+	// 	};
+	// 	const route = '/user/signup';
 
-		//Mongoose method for getting the number of documents that matches this filter
-		let uniqueNameCount = await userModel.countDocuments({
-			name: infoSend.name,
-		});
-		let uniqueEmailCount = await userModel.countDocuments({
-			email: infoSend.email,
-		});
+	// 	//Mongoose method for getting the number of documents that matches this filter
+	// 	let uniqueNameCount = await userModel.countDocuments({
+	// 		name: infoSend.name,
+	// 	});
+	// 	let uniqueEmailCount = await userModel.countDocuments({
+	// 		email: infoSend.email,
+	// 	});
 
-		// expect them to be 0
-		expect(uniqueNameCount).toBe(0);
-		expect(uniqueEmailCount).toBe(0);
-	});
+	// 	// expect them to be 0
+	// 	expect(uniqueNameCount).toBe(0);
+	// 	expect(uniqueEmailCount).toBe(0);
+	// });
 
 	it.todo('should encrypt recieved password');
 

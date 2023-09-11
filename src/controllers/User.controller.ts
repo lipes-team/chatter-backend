@@ -1,4 +1,3 @@
-import { NoTimestamps } from '../database/abstraction';
 import { userService } from '../services/User.service';
 import { RouteOpts } from '../utils/types';
 import { User } from '../models/User.model';
