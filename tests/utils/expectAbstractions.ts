@@ -9,5 +9,5 @@ export const expectResponseBody = <Expected extends {}>(
 	expectedObject: Expected
 ) => {
 	const responseBody = res.body;
-	expect(responseBody).toMatchObject(expectedObject);
+	expect(responseBody).toEqual(expect.objectContaining(expectedObject));
 };
