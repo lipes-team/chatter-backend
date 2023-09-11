@@ -1,7 +1,6 @@
 import { FilterQuery, Types, UpdateQuery, QueryOptions, Model } from 'mongoose';
-import { Timestamps } from '../utils/types';
 
-export type NewResource<TModel, KeysToChange extends keyof TModel> = Omit<
+export type OptionalArrays<TModel, KeysToChange extends keyof TModel> = Omit<
 	TModel,
 	KeysToChange
 > & {
@@ -9,7 +8,18 @@ export type NewResource<TModel, KeysToChange extends keyof TModel> = Omit<
 		? TArray[] extends Types.ObjectId[]
 		? string[] | string | Types.ObjectId[] | Types.ObjectId
 		: TArray[]
-		: undefined;
+		: TModel[key];
+	};
+
+export type RequiredArrays<TModel, KeysToChange extends keyof TModel> = Omit<
+	TModel,
+	KeysToChange
+> & {
+		[key in KeysToChange]: TModel[key] extends Array<infer TArray>
+		? TArray[] extends Types.ObjectId[]
+		? string[] | string | Types.ObjectId[] | Types.ObjectId
+		: TArray[]
+		: TModel[key];
 	};
 
 export type FilterOptions<TModel> = FilterQuery<TModel> & {
