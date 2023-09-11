@@ -8,7 +8,7 @@ import {
 	FilterOptions,
 	UpdateOptions,
 	OptionsQuery,
-	NoTimestamps,
+	OptionalArrays,
 } from '../database/abstraction';
 
 import bcrypt from 'bcrypt';
