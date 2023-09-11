@@ -83,8 +83,7 @@ describe('Post Body Services', () => {
 		];
 		const postBodies = [id1, id2, id3];
 		const newPost = await postModel.create({ postInfo: postBodies });
-		const postObj = newPost.toObject();
-		const deleteArray = postObj.postInfo.map((post) =>
+		const deleteArray = newPost.postInfo.map((post) =>
 			postBodyService.deleteOneBody({ _id: post._id })
 		);
 
