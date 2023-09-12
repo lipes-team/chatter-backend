@@ -49,115 +49,136 @@ describe.only('POST /users/signup', () => {
 		}
 	});
 
-	it('throw error message if user data invalid', async () => {
-		const infoSend = {
-			name: 'John Doe',
-			password: 'abc1', //invalid password
-			email: 'johndoe@email.com',
-		};
-		const route = '/user/signup';
-		const error = {
-			errors: [
-				{
-					message:
-						'Invalid password, must contain at least one uppercase letter, one lowercase letter, one number, and is at least 8 characters long',
-					path: ['body', 'password'],
-				},
-			],
-		};
+	it('CONTROLER: throw error message if user signup data invalid',
+		async () => {
+			const infoSend = {
+				name: 'John Doe',
+				password: 'abc1', //invalid password
+				email: 'johndoe@email.com',
+			};
+			const route = '/user/signup';
+			const error = {
+				errors: [
+					{
+						message:
+							'Invalid password, must contain at least one uppercase letter, one lowercase letter, one number, and is at least 8 characters long',
+						path: ['body', 'password'],
+					},
+				],
+			};
 
-		if (app) {
-			const res = await postRequest({ app, infoSend, route });
-			expectStatus(res, 400);
-			expectResponseBody(res, error);
-		}
-	});
+			if (app) {
+				const res = await postRequest({ app, infoSend, route });
+				expectStatus(res, 400);
+				expectResponseBody(res, error);
+			}
+		});
 
-	it('No error if user data is valid', async () => {
-		const infoSend = {
-			name: 'John Doe',
-			password: 'TestTest123', //valid password
-			email: 'johndoe@email.com',
-		};
-		const route = '/user/signup';
+	it('CONTROLER (signup): No error if user signup data is valid',
+		async () => {
+			const infoSend = {
+				name: 'John Doe',
+				password: 'TestTest123', //valid password
+				email: 'johndoe@email.com',
+			};
+			const route = '/user/signup';
 
-		if (app) {
-			const res = await postRequest({ app, infoSend, route });
-			expectStatus(res, 201);
-		}
-	});
+			if (app) {
+				const res = await postRequest({ app, infoSend, route });
+				expectStatus(res, 201);
+			}
+		});
 
-	it('400 error and simple message if email is not unique', async () => {
-		const infoSend = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'uniquejane@email.com',
-		};
-		const route = '/user/signup';
+	it('CONTROLER (signup): Respond with 400 and simple message if email is not unique',
+		async () => {
+			const infoSend = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'uniquejane@email.com',
+			};
+			const route = '/user/signup';
 
-		await find(userModel, { email: infoSend.email });
+			await find(userModel, { email: infoSend.email });
 
-		if (app) {
-			const res = await postRequest({ app, infoSend, route });
-			expectStatus(res, 400);
-		}
-	});
+			if (app) {
+				const res = await postRequest({ app, infoSend, route });
+				expectStatus(res, 400);
+			}
+		});
 
-	it('Password in db should be hashed and match original password', async () => {
-		const userInfo = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'janedoe@email.com',
-		};
+	it('SERVICE: Password in db should be hashed and match original password',
+		async () => {
+			const userInfo = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'janedoe@email.com',
+			};
 
-		// shallow copy because .createUser changes the original
-		const originalUserInfo = { ...userInfo };
+			// shallow copy because .createUser changes the original
+			const originalUserInfo = { ...userInfo };
 
-		await userService.createUser(userInfo);
+			await userService.createUser(userInfo);
 
-		let savedUser = await findOne(userModel, { email: userInfo.email }).select(
-			'+password'
-		);
-
-		if (savedUser?.password) {
-			expect(savedUser.password).not.toEqual(originalUserInfo.password);
-
-			let isHashed = await userService.compareHashedPassword(
-				originalUserInfo.password,
-				savedUser.password
+			let savedUser = await findOne(userModel, { email: userInfo.email }).select(
+				'+password'
 			);
 
-			expect(isHashed).toBe(true);
-		}
-	});
+			if (savedUser?.password) {
+				expect(savedUser.password).not.toEqual(originalUserInfo.password);
 
-	it("should check if user exists in DB", async () => {
-		const userInfo = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'janedoe@email.com',
-		};
-		const userCheck = await userService.checkUser(userInfo.email, userInfo.password);
+				let isHashed = await userService.compareHashedPassword(
+					originalUserInfo.password,
+					savedUser.password
+				);
 
-		expect((userCheck as { userExists: boolean, userInfo: Object }).userExists).toBe(true);
-	})
+				expect(isHashed).toBe(true);
+			}
+		});
 
-	it("Should create a JWToken", async () => {
-		const userInfo = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'janedoe@email.com',
-		};
+	it("SERVICE: should check if user exists in DB",
+		async () => {
+			const userInfo = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'janedoe@email.com',
+			};
+			const userCheck = await userService.checkUser(userInfo.email, userInfo.password);
 
-		let userCheck = await userService.checkUser(userInfo.email, userInfo.password);
+			expect((userCheck as { userExists: boolean, userInfo: Object }).userExists).toBe(true);
+		})
+
+	it("SERVICE: Should create a JWToken",
+		async () => {
+			const userInfo = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'janedoe@email.com',
+			};
+
+			let userCheck = await userService.checkUser(userInfo.email, userInfo.password);
 
 
-		if (typeof userCheck === "object") {
-			let authToken = userService.createAuthToken(userCheck.userInfo);
+			if (typeof userCheck === "object") {
+				let authToken = userService.createAuthToken(userCheck.userInfo);
 
-			expect(authToken).toBeDefined();
-		}
+				expect(authToken).toBeDefined();
+			}
 
-	})
+		})
+
+	it("CONTROLER (login): Should respond 200 if user logins with valid info",
+		async () => {
+			const infoSend = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'uniquejane@email.com',
+			};
+			const route = '/user/login';
+
+			if (app) {
+				const res = await postRequest({ app, infoSend, route })
+				expectStatus(res, 200);
+			}
+		})
 
 });
