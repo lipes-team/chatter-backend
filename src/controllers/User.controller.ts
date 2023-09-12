@@ -23,6 +23,23 @@ class UserController {
 			next(error);
 		}
 	}
+
+	async login(
+		req: RouteOpts['payload'],
+		res: RouteOpts['res'],
+		next: RouteOpts['next']
+	) {
+		try {
+			const { name, password, email } = req.body;
+			const authToken = await userService.createAuthToken({ name, password, email });
+
+			return res.status(200).json({ authToken: authToken });
+
+		} catch (error: any) {
+			error.path = "Login user";
+			next(error);
+		}
+	}
 }
 
 export const userController = new UserController();
