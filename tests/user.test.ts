@@ -142,4 +142,22 @@ describe.only('POST /users/signup', () => {
 		expect((userCheck as { userExists: boolean, userInfo: Object }).userExists).toBe(true);
 	})
 
+	it("Should create a JWToken", async () => {
+		const userInfo = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'janedoe@email.com',
+		};
+
+		let userCheck = await userService.checkUser(userInfo.email, userInfo.password);
+
+
+		if (typeof userCheck === "object") {
+			let authToken = userService.createAuthToken(userCheck.userInfo);
+
+			expect(authToken).toBeDefined();
+		}
+
+	})
+
 });
