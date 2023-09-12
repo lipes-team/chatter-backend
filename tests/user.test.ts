@@ -130,4 +130,16 @@ describe.only('POST /users/signup', () => {
 			expect(isHashed).toBe(true);
 		}
 	});
+
+	it("should check if user exists in DB", async () => {
+		const userInfo = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'janedoe@email.com',
+		};
+		const userCheck = await userService.checkUser(userInfo.email, userInfo.password);
+
+		expect((userCheck as { userExists: boolean, userInfo: Object }).userExists).toBe(true);
+	})
+
 });
