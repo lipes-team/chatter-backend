@@ -13,11 +13,14 @@ import {
 
 import bcrypt from 'bcrypt';
 
+const jwt = require('jsonwebtoken');
+
 type Filter = FilterOptions<User>;
 type Update = UpdateOptions<User>;
 type Options = OptionsQuery<User>;
 /* type UserData = NoTimestamps<User>; Comentei esta e criei uma intertface simples */
 interface UserData {
+	id?: string,
 	name: string;
 	password: string;
 	email: string;
@@ -84,6 +87,22 @@ class UserService {
 		//returns false by default
 		return false;
 
+	}
+
+	createAuthToken(
+		user: UserData
+	) {
+		let authToken = "";
+		const jwtSecret: string = process.env.JWT_SECRET || "d3f4ults3cr3t";
+
+		const { id, name, email } = user;
+		const payload = { id, name, email };
+
+		return authToken = jwt.sign(
+			payload,
+			jwtSecret,
+			{ algorithm: 'HS256', expiresIn: "6h" },
+		);
 	}
 
 }
