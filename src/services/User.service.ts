@@ -61,6 +61,32 @@ class UserService {
 			});
 		});
 	}
+
+	async checkUser(
+		email: string,
+		password: string
+	) {
+		try {
+			let user: UserData = await findOne(userModel, { email }).select(
+				'+password'
+			);
+
+			// If user exists, check password
+
+			return {
+				userExists: await this.compareHashedPassword(password, user.password),
+				userInfo: user
+			}
+		} catch (error) {
+			console.error(error);
+		}
+
+		//returns false by default
+		return false;
+
+	}
+
 }
+
 
 export const userService = new UserService();
