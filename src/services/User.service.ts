@@ -13,14 +13,14 @@ import {
 
 import bcrypt from 'bcrypt';
 
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
 type Filter = FilterOptions<User>;
 type Update = UpdateOptions<User>;
 type Options = OptionsQuery<User>;
-/* type UserData = NoTimestamps<User>; Comentei esta e criei uma intertface simples */
+
 interface UserData {
-	id?: string,
+	id?: string;
 	name: string;
 	password: string;
 	email: string;
@@ -65,10 +65,7 @@ class UserService {
 		});
 	}
 
-	async checkUser(
-		email: string,
-		password: string
-	) {
+	async checkUser(email: string, password: string) {
 		try {
 			let user: UserData = await findOne(userModel, { email }).select(
 				'+password'
@@ -78,22 +75,19 @@ class UserService {
 
 			return {
 				userExists: await this.compareHashedPassword(password, user.password),
-				userInfo: user
-			}
+				userInfo: user,
+			};
 		} catch (error) {
 			console.error(error);
 		}
 
 		//returns false by default
 		return false;
-
 	}
 
-	createAuthToken(
-		user: UserData
-	) {
-		let authToken = "";
-		const jwtSecret: string = process.env.JWT_SECRET || "d3f4ults3cr3t";
+	createAuthToken(user: UserData) {
+		let authToken = '';
+		const jwtSecret: string = process.env.JWT_SECRET || 'd3f4ults3cr3t';
 
 		const { id, name, email } = user;
 		const payload = { id, name, email };

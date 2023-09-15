@@ -1,6 +1,5 @@
 import { userService } from '../services/User.service';
 import { RouteOpts } from '../utils/types';
-import { User } from '../models/User.model';
 
 class UserController {
 	async create(
@@ -30,12 +29,15 @@ class UserController {
 	) {
 		try {
 			const { name, password, email } = req.body;
-			const authToken = await userService.createAuthToken({ name, password, email });
+			const authToken = await userService.createAuthToken({
+				name,
+				password,
+				email,
+			});
 
 			return res.status(200).json({ authToken: authToken });
-
 		} catch (error: any) {
-			error.path = "Login user";
+			error.path = 'Login user';
 			next(error);
 		}
 	}
