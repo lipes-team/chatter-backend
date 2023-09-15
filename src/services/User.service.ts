@@ -13,6 +13,7 @@ import {
 import bcrypt from 'bcrypt';
 
 import jwt from 'jsonwebtoken';
+import { Remover } from '../utils/types';
 
 type Filter = FilterOptions<User>;
 type Update = UpdateOptions<User>;
@@ -64,35 +65,23 @@ class UserService {
 		});
 	}
 
-	async findUser(email: string, password: string) {
-		try {
-			let user: UserData = await findOne(userModel, { email }).select(
-				'+password'
-			);
-
-			if (user) {
-				return user
-			} else {
-				return false;
-			}
-		} catch (error) {
-			console.error(error);
-		}
-
-
+	async findUser(email: string) {
+		return findOne(userModel, { email }).select(
+			'+password'
+		);
 	}
 
-	createAuthToken(user: UserData) {
+	createAuthToken(user: Remover<UserData, "password">) {
 		let authToken
 		const jwtSecret: string = process.env.JWT_SECRET || 'd3f4ults3cr3t';
 
 		const { id, name, email } = user;
 		const payload = { id, name, email };
 
-		return (authToken = jwt.sign(payload, jwtSecret, {
+		return authToken = jwt.sign(payload, jwtSecret, {
 			algorithm: 'HS256',
 			expiresIn: '6h',
-		}));
+		});
 	}
 }
 
