@@ -8,37 +8,22 @@ import {
 	FilterOptions,
 	UpdateOptions,
 	OptionsQuery,
-<<<<<<< HEAD
-	NoTimestamps,
 } from '../database/abstraction';
 
 import bcrypt from 'bcrypt';
 
-const jwt = require('jsonwebtoken');
-=======
-	OptionalArrays,
-} from '../database/abstraction';
-import { Remover, Timestamps } from '../utils/types';
->>>>>>> 32885964e4c315c4229e353cb01096580f1aed98
+import jwt from 'jsonwebtoken';
 
 type Filter = FilterOptions<User>;
 type Update = UpdateOptions<User>;
 type Options = OptionsQuery<User>;
-<<<<<<< HEAD
-/* type UserData = NoTimestamps<User>; Comentei esta e criei uma intertface simples */
+
 interface UserData {
-	id?: string,
+	id?: string;
 	name: string;
 	password: string;
 	email: string;
 }
-=======
-type UserData = Remover<User, keyof Timestamps>;
-type NewUser = OptionalArrays<
-	UserData,
-	'groupMembership' | 'groupSubscription'
->;
->>>>>>> 32885964e4c315c4229e353cb01096580f1aed98
 
 class UserService {
 	userModel: UserModel;
@@ -46,7 +31,6 @@ class UserService {
 	constructor() {
 		this.userModel = userModel;
 	}
-<<<<<<< HEAD
 	async createUser(newUser: UserData) {
 		let hashedPassword = await this.hashPassword(newUser);
 		newUser.password = hashedPassword;
@@ -80,10 +64,7 @@ class UserService {
 		});
 	}
 
-	async checkUser(
-		email: string,
-		password: string
-	) {
+	async checkUser(email: string, password: string) {
 		try {
 			let user: UserData = await findOne(userModel, { email }).select(
 				'+password'
@@ -93,41 +74,28 @@ class UserService {
 
 			return {
 				userExists: await this.compareHashedPassword(password, user.password),
-				userInfo: user
-			}
+				userInfo: user,
+			};
 		} catch (error) {
 			console.error(error);
 		}
 
 		//returns false by default
 		return false;
-
 	}
 
-	createAuthToken(
-		user: UserData
-	) {
-		let authToken = "";
-		const jwtSecret: string = process.env.JWT_SECRET || "d3f4ults3cr3t";
+	createAuthToken(user: UserData) {
+		let authToken = '';
+		const jwtSecret: string = process.env.JWT_SECRET || 'd3f4ults3cr3t';
 
 		const { id, name, email } = user;
 		const payload = { id, name, email };
 
-		return authToken = jwt.sign(
-			payload,
-			jwtSecret,
-			{ algorithm: 'HS256', expiresIn: "6h" },
-		);
-	}
-
-}
-
-
-=======
-	async createUser(newUser: NewUser) {
-		return addToDb(this.userModel, newUser);
+		return (authToken = jwt.sign(payload, jwtSecret, {
+			algorithm: 'HS256',
+			expiresIn: '6h',
+		}));
 	}
 }
 
->>>>>>> 32885964e4c315c4229e353cb01096580f1aed98
 export const userService = new UserService();
