@@ -1,5 +1,5 @@
 import { logger } from '../utils/logger';
-import { connect, disconnect } from './mongoose.imports';
+import { connect, disconnect } from 'mongoose';
 
 const MONGODB = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/chatter';
 const isDev = process.env.NODE_ENV === 'dev';

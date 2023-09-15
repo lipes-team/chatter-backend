@@ -15,7 +15,7 @@ export const validateSchema =
 				body,
 				params,
 				query,
-				// payload TODO: uncomment after adding auth
+				// payload
 			});
 			next();
 		} catch (error: any) {

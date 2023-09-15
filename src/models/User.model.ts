@@ -1,12 +1,4 @@
-import {
-	Schema,
-	model,
-	InferSchemaType,
-	HydratedDocument,
-	Model,
-} from '../database/mongoose.imports';
-
-import { Timestamps } from '../utils/types';
+import { Schema, model, InferSchemaType, Model } from 'mongoose';
 
 const userSchema = new Schema(
 	{

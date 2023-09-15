@@ -1,30 +1,33 @@
-import { Schema, model, InferSchemaType, HydratedDocument } from 'mongoose';
+import { Schema, model, InferSchemaType, Model } from 'mongoose';
 
-const postSchema = new Schema({
-	title: {
-		type: String,
-		required: true,
+import { OptionalArrays, RequiredArrays } from '../database/abstraction';
+import { Remover, Timestamps } from '../utils/types';
+
+const postSchema = new Schema(
+	{
+		owner: {
+			type: Schema.Types.ObjectId,
+			ref: 'User',
+		},
+		postInfo: {
+			type: [Schema.Types.ObjectId],
+			ref: 'PostBody',
+		},
+		comments: {
+			type: [Schema.Types.ObjectId],
+			ref: 'Comments',
+		},
 	},
-	owner: {
-		type: Schema.Types.ObjectId,
-		ref: 'User',
-	},
-	postInfo: {
-		type: [Schema.Types.ObjectId],
-		ref: 'PostBody',
-		// TODO: Add reference after the postBody being created
-		required: false,
-	},
-	comments: {
-		type: [Schema.Types.ObjectId],
-		ref: 'Comments',
-		required: false,
-	},
-});
+	{ timestamps: true }
+);
 
 type Post = InferSchemaType<typeof postSchema>;
-type PostHydrated = HydratedDocument<typeof postSchema>;
+type PostModel = Model<Post>;
 
-const postModel = model<Post>('Post', postSchema);
+type OptionalPost = OptionalArrays<Post, 'comments'>;
+type Required = RequiredArrays<OptionalPost, 'postInfo'>;
+type NewPost = Remover<Required, keyof Timestamps>;
 
-export { postModel, Post, PostHydrated };
+const postModel = model('Post', postSchema);
+
+export { postModel, Post, PostModel, NewPost };

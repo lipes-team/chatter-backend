@@ -1,4 +1,4 @@
-import { Post, postModel } from '../models/Post.model';
+import { NewPost, Post, PostModel, postModel } from '../models/Post.model';
 import {
 	addToDb,
 	find,
@@ -15,17 +15,22 @@ type Update = UpdateOptions<Post>;
 type Options = OptionsQuery<Post>;
 
 class PostService {
-	async createPost(newPost: Partial<Post>) {
-		return addToDb(postModel, newPost);
+	postModel: PostModel;
+	constructor() {
+		this.postModel = postModel;
+	}
+
+	async createPost(newPost: NewPost) {
+		return addToDb(this.postModel, newPost);
 	}
 
 	// TODO: Should find all the posts the user subscribes?
 	async findAllPosts(filter: Filter, options?: Options) {
-		return find(postModel, filter, options);
+		return find(this.postModel, filter, options);
 	}
 
 	async findOnePost(filter: Filter, options?: Options) {
-		return findOne(postModel, filter, options);
+		return findOne(this.postModel, filter, options);
 	}
 
 	async findPostAndUpdate(
@@ -33,11 +38,11 @@ class PostService {
 		updateData: Update,
 		options?: Options
 	) {
-		return update(postModel, filter, updateData, options);
+		return update(this.postModel, filter, updateData, options);
 	}
 
 	async deletePost(filter: Filter) {
-		return deleteOne(postModel, filter);
+		return deleteOne(this.postModel, filter);
 	}
 }
 

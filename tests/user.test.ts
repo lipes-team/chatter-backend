@@ -14,7 +14,6 @@ import { logger } from '../src/utils/logger';
 import { initializeApp } from '../app';
 import { findOne, find, addToDb } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
-import { userController } from '../src/controllers/User.controller';
 import { userService } from '../src/services/User.service';
 
 describe.only('POST /users/signup', () => {
@@ -49,130 +48,129 @@ describe.only('POST /users/signup', () => {
 		}
 	});
 
-	it('CONTROLER: throw error message if user signup data invalid',
-		async () => {
-			const infoSend = {
-				name: 'John Doe',
-				password: 'abc1', //invalid password
-				email: 'johndoe@email.com',
-			};
-			const route = '/user/signup';
-			const error = {
-				errors: [
-					{
-						message:
-							'Invalid password, must contain at least one uppercase letter, one lowercase letter, one number, and is at least 8 characters long',
-						path: ['body', 'password'],
-					},
-				],
-			};
+	it('CONTROLER: throw error message if user signup data invalid', async () => {
+		const infoSend = {
+			name: 'John Doe',
+			password: 'abc1', //invalid password
+			email: 'johndoe@email.com',
+		};
+		const route = '/user/signup';
+		const error = {
+			errors: [
+				{
+					message:
+						'Invalid password, must contain at least one uppercase letter, one lowercase letter, one number, and is at least 8 characters long',
+					path: ['body', 'password'],
+				},
+			],
+		};
 
-			if (app) {
-				const res = await postRequest({ app, infoSend, route });
-				expectStatus(res, 400);
-				expectResponseBody(res, error);
-			}
-		});
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
+			expectResponseBody(res, error);
+		}
+	});
 
-	it('CONTROLER (signup): No error if user signup data is valid',
-		async () => {
-			const infoSend = {
-				name: 'John Doe',
-				password: 'TestTest123', //valid password
-				email: 'johndoe@email.com',
-			};
-			const route = '/user/signup';
-			if (app) {
-				const res = await postRequest({ app, infoSend, route });
-				expectStatus(res, 201);
-			}
-		});
-	it('CONTROLER (signup): Respond with 400 and simple message if email is not unique',
-		async () => {
-			const infoSend = {
-				name: 'Jane Doe',
-				password: 'TestTest123', //valid password
-				email: 'uniquejane@email.com',
-			};
-			const route = '/user/signup';
-			await find(userModel, { email: infoSend.email });
-			if (app) {
-				const res = await postRequest({ app, infoSend, route });
-				expectStatus(res, 400);
-			}
-		});
-	it('SERVICE: Password in db should be hashed and match original password',
-		async () => {
-			const userInfo = {
-				name: 'Jane Doe',
-				password: 'TestTest123', //valid password
-				email: 'janedoe@email.com',
-			};
+	it('CONTROLER (signup): No error if user signup data is valid', async () => {
+		const infoSend = {
+			name: 'John Doe',
+			password: 'TestTest123', //valid password
+			email: 'johndoe@email.com',
+		};
+		const route = '/user/signup';
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 201);
+		}
+	});
+	it('CONTROLER (signup): Respond with 400 and simple message if email is not unique', async () => {
+		const infoSend = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'uniquejane@email.com',
+		};
+		const route = '/user/signup';
+		await find(userModel, { email: infoSend.email });
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
+		}
+	});
+	it('SERVICE: Password in db should be hashed and match original password', async () => {
+		const userInfo = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'janedoe@email.com',
+		};
 
-			// shallow copy because .createUser changes the original
-			const originalUserInfo = { ...userInfo };
+		// shallow copy because .createUser changes the original
+		const originalUserInfo = { ...userInfo };
 
-			await userService.createUser(userInfo);
+		await userService.createUser(userInfo);
 
-			let savedUser = await findOne(userModel, { email: userInfo.email }).select(
-				'+password'
+		let savedUser = await findOne(userModel, { email: userInfo.email }).select(
+			'+password'
+		);
+
+		if (savedUser?.password) {
+			expect(savedUser.password).not.toEqual(originalUserInfo.password);
+
+			let isHashed = await userService.compareHashedPassword(
+				originalUserInfo.password,
+				savedUser.password
 			);
 
-			if (savedUser?.password) {
-				expect(savedUser.password).not.toEqual(originalUserInfo.password);
+			expect(isHashed).toBe(true);
+		}
+	});
 
-				let isHashed = await userService.compareHashedPassword(
-					originalUserInfo.password,
-					savedUser.password
-				);
+	it('SERVICE: should check if user exists in DB', async () => {
+		const userInfo = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'janedoe@email.com',
+		};
+		const userCheck = await userService.checkUser(
+			userInfo.email,
+			userInfo.password
+		);
 
-				expect(isHashed).toBe(true);
-			}
-		});
+		expect(
+			(userCheck as { userExists: boolean; userInfo: Object }).userExists
+		).toBe(true);
+	});
 
-	it("SERVICE: should check if user exists in DB",
-		async () => {
-			const userInfo = {
-				name: 'Jane Doe',
-				password: 'TestTest123', //valid password
-				email: 'janedoe@email.com',
-			};
-			const userCheck = await userService.checkUser(userInfo.email, userInfo.password);
+	it('SERVICE: Should create a JWToken', async () => {
+		const userInfo = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'janedoe@email.com',
+		};
 
-			expect((userCheck as { userExists: boolean, userInfo: Object }).userExists).toBe(true);
-		})
+		let userCheck = await userService.checkUser(
+			userInfo.email,
+			userInfo.password
+		);
 
-	it("SERVICE: Should create a JWToken",
-		async () => {
-			const userInfo = {
-				name: 'Jane Doe',
-				password: 'TestTest123', //valid password
-				email: 'janedoe@email.com',
-			};
+		if (typeof userCheck === 'object') {
+			let authToken = userService.createAuthToken(userCheck.userInfo);
 
-			let userCheck = await userService.checkUser(userInfo.email, userInfo.password);
+			expect(authToken).toBeDefined();
+		}
+	});
 
+	it('CONTROLER (login): Should respond 200 if user logins with valid info', async () => {
+		const infoSend = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'uniquejane@email.com',
+		};
+		const route = '/user/login';
 
-			if (typeof userCheck === "object") {
-				let authToken = userService.createAuthToken(userCheck.userInfo);
-
-				expect(authToken).toBeDefined();
-			}
-		})
-
-	it("CONTROLER (login): Should respond 200 if user logins with valid info",
-		async () => {
-			const infoSend = {
-				name: 'Jane Doe',
-				password: 'TestTest123', //valid password
-				email: 'uniquejane@email.com',
-			};
-			const route = '/user/login';
-
-			if (app) {
-				const res = await postRequest({ app, infoSend, route })
-				expectStatus(res, 200);
-			}
-		})
-
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 200);
+		}
+	});
 });

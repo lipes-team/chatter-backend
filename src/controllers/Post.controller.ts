@@ -1,5 +1,7 @@
 import { Post } from '../models/Post.model';
+import { PostBody } from '../models/PostBody.model';
 import { postService } from '../services/Post.service';
+import { postBodyService } from '../services/PostBody.service';
 import { RouteOpts } from '../utils/types';
 
 class PostController {
@@ -9,8 +11,9 @@ class PostController {
 		next: RouteOpts['next']
 	) {
 		try {
-			const { title }: Post = req.body;
-			const newPost = await postService.createPost({ title: title! });
+			const { postBody } = req.body;
+			const newBody = await postBodyService.createPostBody(postBody);
+			const newPost = await postService.createPost({ postInfo: newBody._id });
 			return res.status(201).json(newPost);
 		} catch (error: any) {
 			error.path = 'Create a new Post';

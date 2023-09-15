@@ -8,16 +8,23 @@ import {
 	FilterOptions,
 	UpdateOptions,
 	OptionsQuery,
+<<<<<<< HEAD
 	NoTimestamps,
 } from '../database/abstraction';
 
 import bcrypt from 'bcrypt';
 
 const jwt = require('jsonwebtoken');
+=======
+	OptionalArrays,
+} from '../database/abstraction';
+import { Remover, Timestamps } from '../utils/types';
+>>>>>>> 32885964e4c315c4229e353cb01096580f1aed98
 
 type Filter = FilterOptions<User>;
 type Update = UpdateOptions<User>;
 type Options = OptionsQuery<User>;
+<<<<<<< HEAD
 /* type UserData = NoTimestamps<User>; Comentei esta e criei uma intertface simples */
 interface UserData {
 	id?: string,
@@ -25,6 +32,13 @@ interface UserData {
 	password: string;
 	email: string;
 }
+=======
+type UserData = Remover<User, keyof Timestamps>;
+type NewUser = OptionalArrays<
+	UserData,
+	'groupMembership' | 'groupSubscription'
+>;
+>>>>>>> 32885964e4c315c4229e353cb01096580f1aed98
 
 class UserService {
 	userModel: UserModel;
@@ -32,6 +46,7 @@ class UserService {
 	constructor() {
 		this.userModel = userModel;
 	}
+<<<<<<< HEAD
 	async createUser(newUser: UserData) {
 		let hashedPassword = await this.hashPassword(newUser);
 		newUser.password = hashedPassword;
@@ -108,4 +123,11 @@ class UserService {
 }
 
 
+=======
+	async createUser(newUser: NewUser) {
+		return addToDb(this.userModel, newUser);
+	}
+}
+
+>>>>>>> 32885964e4c315c4229e353cb01096580f1aed98
 export const userService = new UserService();

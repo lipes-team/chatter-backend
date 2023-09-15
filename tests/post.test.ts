@@ -16,6 +16,12 @@ import { initializeApp } from '../app';
 describe('Posts Controller', () => {
 	let database: Connection | undefined;
 	let app: Express | undefined;
+	const postBody = {
+		text: `Harness the elegance of async/await, a game-changing duo that simplifies asynchronous programming. 
+			 With async functions and await keyword, you can write smoother, more readable code by handling promises gracefully. 
+			 Say goodbye to callback hell and embrace a structured, sequential approach to handling asynchronous tasks.`,
+		title: 'Mastering the Art of Asynchronous JavaScript',
+	};
 	beforeAll(async () => {
 		try {
 			const { app: application, db } = await initializeApp();
@@ -29,36 +35,40 @@ describe('Posts Controller', () => {
 
 	afterAll(async () => {
 		try {
-			await database?.db.dropDatabase();
+			if (database) {
+				await database.db.dropDatabase();
+			}
 			await disconnectDB();
 		} catch (error) {
 			logger.error(error);
 		}
 	});
 
-	it('POST/should create a new post', async () => {
-		const infoSend = {
-			title: 'This is the post test',
-		};
+	it('should create a new post', async () => {
+		const infoSend = { postBody };
 		const route = '/post';
+
+		const expecxtRes = {
+			postInfo: expect.any(Array<String>),
+		};
 
 		if (app) {
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 201);
-			expectResponseBody(res, infoSend);
+			expectResponseBody(res, expecxtRes);
 		}
 	});
 
-	it("POST/shouldn't create a new post", async () => {
+	it("shouldn't create a new post", async () => {
 		const infoSend = {};
 		const route = '/post';
 		const error = {
 			errors: [
 				{
 					message: 'Required',
-					expected: 'string',
+					expected: 'object',
 					received: 'undefined',
-					path: ['body', 'title'],
+					path: ['body', 'postBody'],
 				},
 			],
 			path: 'Validation',
@@ -68,6 +78,88 @@ describe('Posts Controller', () => {
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 400);
 			expectResponseBody(res, error);
+		}
+	});
+
+	it("shouldn't create a new post without the title", async () => {
+		const infoSend: { postBody: Partial<typeof postBody> } = {
+			postBody: { ...postBody },
+		};
+		delete infoSend.postBody.title;
+		const route = '/post';
+		const error = {
+			errors: [
+				{
+					message: 'Required',
+					expected: 'string',
+					received: 'undefined',
+					path: ['body', 'postBody', 'title'],
+				},
+			],
+			path: 'Validation',
+		};
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
+			expectResponseBody(res, error);
+		}
+
+		infoSend.postBody.title = '';
+		const errorEmpyTitle = {
+			errors: [
+				{
+					message: 'String must contain at least 1 character(s)',
+					path: ['body', 'postBody', 'title'],
+				},
+			],
+			path: 'Validation',
+		};
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
+			expectResponseBody(res, errorEmpyTitle);
+		}
+	});
+
+	it("shouldn't create a new post without the text", async () => {
+		const infoSend: { postBody: Partial<typeof postBody> } = {
+			postBody: { ...postBody },
+		};
+		delete infoSend.postBody.text;
+		const route = '/post';
+		const error = {
+			errors: [
+				{
+					message: 'Required',
+					expected: 'string',
+					received: 'undefined',
+					path: ['body', 'postBody', 'text'],
+				},
+			],
+			path: 'Validation',
+		};
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
+			expectResponseBody(res, error);
+		}
+
+		infoSend.postBody.text = '';
+		const errorEmpyText = {
+			errors: [
+				{
+					message: 'String must contain at least 1 character(s)',
+					path: ['body', 'postBody', 'text'],
+				},
+			],
+			path: 'Validation',
+		};
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
+			expectResponseBody(res, errorEmpyText);
 		}
 	});
 });

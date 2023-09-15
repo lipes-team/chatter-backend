@@ -1,22 +1,36 @@
-import { Timestamps } from '../utils/types';
-import {
-	Model,
-	InferSchemaType,
-	HydratedDocument,
-	HydratedDocumentFromSchema,
-	FilterQuery,
-	QueryOptions,
-	UpdateQuery,
-} from './mongoose.imports';
+import { FilterQuery, Types, UpdateQuery, QueryOptions, Model } from 'mongoose';
 
-export type NoTimestamps<TModel> = Partial<Omit<TModel, keyof Timestamps>>; //added Partial to make groups optional
-export type FilterOptions<TModel> = FilterQuery<TModel> & { _id?: string };
+export type OptionalArrays<TModel, KeysToChange extends keyof TModel> = Omit<
+	TModel,
+	KeysToChange
+> & {
+	[key in KeysToChange]?: TModel[key] extends Array<infer TArray>
+		? TArray[] extends Types.ObjectId[]
+			? string[] | string | Types.ObjectId[] | Types.ObjectId
+			: TArray[]
+		: TModel[key];
+};
+
+export type RequiredArrays<TModel, KeysToChange extends keyof TModel> = Omit<
+	TModel,
+	KeysToChange
+> & {
+	[key in KeysToChange]: TModel[key] extends Array<infer TArray>
+		? TArray[] extends Types.ObjectId[]
+			? string[] | string | Types.ObjectId[] | Types.ObjectId
+			: TArray[]
+		: TModel[key];
+};
+
+export type FilterOptions<TModel> = FilterQuery<TModel> & {
+	_id?: string | Types.ObjectId | Types.ObjectId[];
+};
 export type UpdateOptions<TModel> = UpdateQuery<TModel> | Partial<TModel>;
 export type OptionsQuery<TModel> = QueryOptions<TModel>;
 
-export const addToDb = <TModel>(
+export const addToDb = <TModel, TCreate>(
 	model: Model<TModel>,
-	newObject: NoTimestamps<TModel> | NoTimestamps<TModel>[] // changed to array of objects
+	newObject: TCreate | TCreate[] // changed to array of objects
 ) => {
 	return model.create(newObject);
 };
