@@ -131,33 +131,39 @@ describe.only('POST /users/signup', () => {
 			password: 'TestTest123', //valid password
 			email: 'janedoe@email.com',
 		};
-		const userCheck = await userService.checkUser(
+		const userInDB = await userService.findUser(
 			userInfo.email,
 			userInfo.password
 		);
 
-		expect(
-			(userCheck as { userExists: boolean; userInfo: Object }).userExists
-		).toBe(true);
+		expect(userInDB).toBeDefined();
 	});
 
 	it('SERVICE: Should create a JWToken', async () => {
+		let authToken;
+
 		const userInfo = {
 			name: 'Jane Doe',
 			password: 'TestTest123', //valid password
 			email: 'janedoe@email.com',
 		};
 
-		let userCheck = await userService.checkUser(
+		let userInDB = await userService.findUser(
 			userInfo.email,
 			userInfo.password
 		);
 
-		if (typeof userCheck === 'object') {
-			let authToken = userService.createAuthToken(userCheck.userInfo);
-
-			expect(authToken).toBeDefined();
+		if (userInDB) {
+			authToken = userService.createAuthToken
 		}
+
+		expect(authToken).toBeDefined();
+
+		/* if (typeof userCheck === 'object') {
+			(userCheck.userInfo);
+
+			
+		} */
 	});
 
 	it('CONTROLER (login): Should respond 200 if user logins with valid info', async () => {

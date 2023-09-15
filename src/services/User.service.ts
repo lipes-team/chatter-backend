@@ -64,28 +64,26 @@ class UserService {
 		});
 	}
 
-	async checkUser(email: string, password: string) {
+	async findUser(email: string, password: string) {
 		try {
 			let user: UserData = await findOne(userModel, { email }).select(
 				'+password'
 			);
 
-			// If user exists, check password
-
-			return {
-				userExists: await this.compareHashedPassword(password, user.password),
-				userInfo: user,
-			};
+			if (user) {
+				return user
+			} else {
+				return false;
+			}
 		} catch (error) {
 			console.error(error);
 		}
 
-		//returns false by default
-		return false;
+
 	}
 
 	createAuthToken(user: UserData) {
-		let authToken = '';
+		let authToken
 		const jwtSecret: string = process.env.JWT_SECRET || 'd3f4ults3cr3t';
 
 		const { id, name, email } = user;
