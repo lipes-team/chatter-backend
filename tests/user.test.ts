@@ -82,13 +82,11 @@ describe.only('POST /users/signup', () => {
 				email: 'johndoe@email.com',
 			};
 			const route = '/user/signup';
-
 			if (app) {
 				const res = await postRequest({ app, infoSend, route });
 				expectStatus(res, 201);
 			}
 		});
-
 	it('CONTROLER (signup): Respond with 400 and simple message if email is not unique',
 		async () => {
 			const infoSend = {
@@ -97,15 +95,12 @@ describe.only('POST /users/signup', () => {
 				email: 'uniquejane@email.com',
 			};
 			const route = '/user/signup';
-
 			await find(userModel, { email: infoSend.email });
-
 			if (app) {
 				const res = await postRequest({ app, infoSend, route });
 				expectStatus(res, 400);
 			}
 		});
-
 	it('SERVICE: Password in db should be hashed and match original password',
 		async () => {
 			const userInfo = {
@@ -163,7 +158,6 @@ describe.only('POST /users/signup', () => {
 
 				expect(authToken).toBeDefined();
 			}
-
 		})
 
 	it("CONTROLER (login): Should respond 200 if user logins with valid info",
