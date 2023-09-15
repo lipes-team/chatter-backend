@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { authRoutes } from './routes/auth.routes';
 import { notFound } from './routes/notFound.routes';
 import { errorHandling } from './routes/errorHandling.routes';
 import { RouteOpts } from './utils/types';
