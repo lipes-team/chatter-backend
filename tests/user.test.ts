@@ -132,11 +132,10 @@ describe.only('POST /users/signup', () => {
 			email: 'janedoe@email.com',
 		};
 		const userInDB = await userService.findUser(
-			userInfo.email,
-			userInfo.password
+			userInfo.email
 		);
 
-		expect(userInDB).toBeDefined();
+		expect(userInDB).not.toBeNull();
 	});
 
 	it('SERVICE: Should create a JWToken', async () => {
@@ -150,7 +149,6 @@ describe.only('POST /users/signup', () => {
 
 		let userInDB = await userService.findUser(
 			userInfo.email,
-			userInfo.password
 		);
 
 		if (userInDB) {
@@ -158,12 +156,6 @@ describe.only('POST /users/signup', () => {
 		}
 
 		expect(authToken).toBeDefined();
-
-		/* if (typeof userCheck === 'object') {
-			(userCheck.userInfo);
-
-			
-		} */
 	});
 
 	it('CONTROLER (login): Should respond 200 if user logins with valid info', async () => {
