@@ -1,11 +1,6 @@
 import { FilterQuery, Types, UpdateQuery, QueryOptions, Model } from 'mongoose';
 
-<<<<<<< HEAD
 export type OptionalArrays<TModel, KeysToChange extends keyof TModel> = Omit<
-=======
-// making mongoose infering optional for arrays (mongoose oversight)
-export type NewResource<TModel, KeysToChange extends keyof TModel> = Omit<
->>>>>>> 87c2ad181527b4b1b730bcc74addd305b60b6860
 	TModel,
 	KeysToChange
 > & {
