@@ -28,9 +28,26 @@ class UserController {
 	) {
 		try {
 			const { name, password, email } = req.body;
-			const authToken = await userService.createAuthToken({
+			const user = await userService.findUser(email)
+
+			if (user === null) {
+				throw {
+					message: "Email and/or password incorrect",
+					status: 400
+				};
+			}
+
+			const passwordValid = await userService.compareHashedPassword(password, user.password)
+
+			if (!passwordValid) {
+				throw {
+					message: "Email and/or password incorrect",
+					status: 400
+				}
+			}
+
+			const authToken = userService.createAuthToken({
 				name,
-				password,
 				email,
 			});
 
