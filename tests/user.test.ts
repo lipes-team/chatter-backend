@@ -16,7 +16,7 @@ import { findOne, find, addToDb } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
 import { userService } from '../src/services/User.service';
 
-describe.only('POST /users/signup', () => {
+describe.only('User Services', () => {
 	let database: Connection | undefined;
 	let app: Express | undefined;
 	beforeAll(async () => {
@@ -24,7 +24,7 @@ describe.only('POST /users/signup', () => {
 			const { app: application, db } = await initializeApp();
 			database = db;
 			app = application;
-			await userModel.ensureIndexes(); //ensure mongoose validation based on userModel
+			await userModel.ensureIndexes();  //ensure mongoose validation based on userModel
 
 			let userInfo = {
 				name: 'Jane Doe',
@@ -84,6 +84,7 @@ describe.only('POST /users/signup', () => {
 			expectStatus(res, 201);
 		}
 	});
+
 	it('CONTROLER (signup): Respond with 400 and simple message if email is not unique', async () => {
 		const infoSend = {
 			name: 'Jane Doe',
@@ -97,6 +98,7 @@ describe.only('POST /users/signup', () => {
 			expectStatus(res, 400);
 		}
 	});
+
 	it('SERVICE: Password in db should be hashed and match original password', async () => {
 		const userInfo = {
 			name: 'Jane Doe',
