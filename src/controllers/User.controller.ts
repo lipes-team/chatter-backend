@@ -27,29 +27,29 @@ class UserController {
 		next: RouteOpts['next']
 	) {
 		try {
-			const { name, password, email } = req.body;
-			const user = await userService.findUser(email)
+			const { password, email } = req.body;
+			const user = await userService.findUser(email);
 
 			if (user === null) {
 				throw {
-					message: "Email and/or password incorrect",
-					status: 400
+					message: 'Email and/or password incorrect',
+					status: 400,
 				};
 			}
 
-			const passwordValid = await userService.compareHashedPassword(password, user.password)
+			const passwordValid = await userService.compareHashedPassword(
+				password,
+				user.password
+			);
 
 			if (!passwordValid) {
 				throw {
-					message: "Email and/or password incorrect",
-					status: 400
-				}
+					message: 'Email and/or password incorrect',
+					status: 400,
+				};
 			}
 
-			const authToken = userService.createAuthToken({
-				name,
-				email,
-			});
+			const authToken = userService.createAuthToken(user);
 
 			return res.status(200).json({ authToken: authToken });
 		} catch (error: any) {
