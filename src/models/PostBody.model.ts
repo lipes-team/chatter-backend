@@ -3,10 +3,6 @@ import { Model, Schema } from 'mongoose';
 
 const postBodySchema = new Schema(
 	{
-		title: {
-			type: String,
-			required: true,
-		},
 		status: {
 			type: String,
 			enum: ['pending', 'live', 'past', 'inReview'],
@@ -17,7 +13,6 @@ const postBodySchema = new Schema(
 );
 
 interface PostBody extends PostBase {
-	title: string;
 	status?: 'pending' | 'live' | 'past' | 'inReview';
 }
 

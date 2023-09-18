@@ -20,7 +20,7 @@ class PostBodyService {
 
 	/**
 	 *
-	 * @param newPost Object: `{title:string,
+	 * @param newPost Object: `{
 	 * status:'pending' | 'live' | 'past' | 'inReview',
 	 * text:string,
 	 * image:string,

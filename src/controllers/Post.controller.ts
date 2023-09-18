@@ -11,9 +11,12 @@ class PostController {
 		next: RouteOpts['next']
 	) {
 		try {
-			const { postBody } = req.body;
+			const { postBody, title } = req.body;
 			const newBody = await postBodyService.createPostBody(postBody);
-			const newPost = await postService.createPost({ postInfo: newBody._id });
+			const newPost = await postService.createPost({
+				title,
+				postInfo: newBody._id,
+			});
 			return res.status(201).json(newPost);
 		} catch (error: any) {
 			error.path = 'Create a new Post';

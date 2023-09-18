@@ -5,6 +5,10 @@ import { Remover, Timestamps } from '../utils/types';
 
 const postSchema = new Schema(
 	{
+		title: {
+			type: String,
+			required: true,
+		},
 		owner: {
 			type: Schema.Types.ObjectId,
 			ref: 'User',
