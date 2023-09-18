@@ -32,7 +32,7 @@ describe.only('POST /users/signup', () => {
 				email: 'uniquejane@email.com',
 			};
 
-			let user = await addToDb(userModel, userInfo);
+			let user = await userService.createUser(userInfo);
 		} catch (error) {
 			logger.error(error);
 			// TODO: should throw an error here too?
