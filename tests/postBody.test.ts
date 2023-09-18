@@ -32,19 +32,12 @@ describe('Post Body Services', () => {
 	test('Create postBody with the default status as pending', async () => {
 		const newBody = await postBodyService.createPostBody(postBody);
 		expect(newBody).toEqual(
-			expect.objectContaining({ ...postBody, status: 'pending' })
+			expect.objectContaining({
+				text: postBody.text,
+				status: 'pending',
+				owner: postBody.owner,
+			})
 		);
-	});
-
-	test('should error when trying to create a postBody without title', async () => {
-		try {
-			const body: Partial<typeof postBody> = { ...postBody };
-			delete body.title;
-			//@ts-expect-error
-			const newBody = await postBodyService.createPostBody(body);
-		} catch (error) {
-			expect(error).not.toBeNull();
-		}
 	});
 
 	test('should error when trying to create a postBody without text', async () => {
@@ -52,7 +45,7 @@ describe('Post Body Services', () => {
 			const body: Partial<typeof postBody> = { ...postBody };
 			delete body.text;
 			//@ts-expect-error
-			const newBody = await postBodyService.createPostBody(body);
+			await postBodyService.createPostBody(body);
 		} catch (error) {
 			expect(error).not.toBeNull();
 		}
@@ -63,7 +56,7 @@ describe('Post Body Services', () => {
 			const body: Partial<typeof postBody> = { ...postBody };
 			delete body.owner;
 			//@ts-expect-error
-			const newBody = await postBodyService.createPostBody(body);
+			await postBodyService.createPostBody(body);
 		} catch (error) {
 			expect(error).not.toBeNull();
 		}
@@ -82,7 +75,10 @@ describe('Post Body Services', () => {
 			createArray[2]._id,
 		];
 		const postBodies = [id1, id2, id3];
-		const newPost = await postModel.create({ postInfo: postBodies });
+		const newPost = await postModel.create({
+			title: postBody.title,
+			postInfo: postBodies,
+		});
 		const deleteArray = newPost.postInfo.map((post) =>
 			postBodyService.deleteOneBody({ _id: post._id })
 		);
