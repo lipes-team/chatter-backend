@@ -42,7 +42,8 @@ const userSchema = new Schema(
 );
 
 type User = InferSchemaType<typeof userSchema>;
+type UserModel = Model<User>;
 
 const userModel = model<User>('User', userSchema);
 
-export { userModel, User };
+export { userModel, User, UserModel };
