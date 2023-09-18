@@ -66,22 +66,20 @@ class UserService {
 	}
 
 	async findUser(email: string) {
-		return findOne(userModel, { email }).select(
-			'+password'
-		);
+		return findOne(userModel, { email }).select('+password');
 	}
 
-	createAuthToken(user: Remover<UserData, "password">) {
-		let authToken
+	createAuthToken(user: Remover<UserData, 'password'>) {
+		let authToken;
 		const jwtSecret: string = process.env.JWT_SECRET || 'd3f4ults3cr3t';
 
 		const { id, name, email } = user;
 		const payload = { id, name, email };
 
-		return authToken = jwt.sign(payload, jwtSecret, {
+		return (authToken = jwt.sign(payload, jwtSecret, {
 			algorithm: 'HS256',
 			expiresIn: '6h',
-		});
+		}));
 	}
 }
 
