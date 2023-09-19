@@ -1,4 +1,4 @@
-import { userModel, User, UserModel } from '../models/User.model';
+import { userModel, User } from '../models/User.model';
 import {
 	addToDb,
 	find,
@@ -27,7 +27,7 @@ interface UserData {
 }
 
 class UserService {
-	userModel: UserModel;
+	userModel: typeof userModel;
 
 	constructor() {
 		this.userModel = userModel;
