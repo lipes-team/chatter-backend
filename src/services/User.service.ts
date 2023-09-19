@@ -1,13 +1,11 @@
 import { userModel, User } from '../models/User.model';
 import {
 	addToDb,
-	find,
 	findOne,
-	deleteOne,
-	update,
 	FilterOptions,
 	UpdateOptions,
 	OptionsQuery,
+	update
 } from '../database/abstraction';
 
 import bcrypt from 'bcrypt';
@@ -82,6 +80,10 @@ class UserService {
 			algorithm: 'HS256',
 			expiresIn: '6h',
 		});
+	}
+
+	updateUser(oldEmail: string, newUser: UserData) {
+		return update(userModel, { email: oldEmail }, newUser, { new: true, lean: true })
 	}
 }
 
