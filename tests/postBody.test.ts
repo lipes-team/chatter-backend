@@ -6,20 +6,20 @@ import { postModel } from '../src/models/Post.model';
 
 describe('Post Body Services', () => {
 	let database: Connection | undefined;
-	let user: Types.ObjectId | undefined;
+	let user: Types.ObjectId | string;
 	const postBody = {
-		owner: user!,
+		owner: '',
 		text: `Harness the elegance of async/await, a game-changing duo that simplifies asynchronous programming. 
            With async functions and await keyword, you can write smoother, more readable code by handling promises gracefully. 
            Say goodbye to callback hell and embrace a structured, sequential approach to handling asynchronous tasks.`,
-		title: 'Mastering the Art of Asynchronous JavaScript',
 	};
+	const title = 'Mastering the Art of Asynchronous JavaScript';
 
 	beforeAll(async () => {
 		database = await connectDB();
 		let [name, password, email] = ['felipe', '12345678', 'felipe@gmail.com'];
 		const newUser = await userModel.create({ name, password, email });
-		user = newUser._id;
+		postBody.owner = newUser._id.toString();
 	});
 
 	afterAll(async () => {
@@ -29,18 +29,18 @@ describe('Post Body Services', () => {
 		await disconnectDB();
 	});
 
-	test('Create postBody with the default status as pending', async () => {
+	it('Create postBody with the default status as pending', async () => {
 		const newBody = await postBodyService.createPostBody(postBody);
 		expect(newBody).toEqual(
 			expect.objectContaining({
 				text: postBody.text,
 				status: 'pending',
-				owner: postBody.owner,
+				owner: expect.any(Types.ObjectId),
 			})
 		);
 	});
 
-	test('should error when trying to create a postBody without text', async () => {
+	it('should error when trying to create a postBody without text', async () => {
 		try {
 			const body: Partial<typeof postBody> = { ...postBody };
 			delete body.text;
@@ -51,7 +51,7 @@ describe('Post Body Services', () => {
 		}
 	});
 
-	test('should error when trying to create a postBody without owner', async () => {
+	it('should error when trying to create a postBody without owner', async () => {
 		try {
 			const body: Partial<typeof postBody> = { ...postBody };
 			delete body.owner;
@@ -76,7 +76,7 @@ describe('Post Body Services', () => {
 		];
 		const postBodies = [id1, id2, id3];
 		const newPost = await postModel.create({
-			title: postBody.title,
+			title,
 			postInfo: postBodies,
 		});
 		const deleteArray = newPost.postInfo.map((post) =>

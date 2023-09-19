@@ -9,6 +9,7 @@ const postBaseSchema = new Schema(
 		image: String,
 		owner: {
 			type: Schema.Types.ObjectId,
+			required: true,
 			ref: 'User',
 		},
 		post: {
