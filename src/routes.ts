@@ -7,16 +7,6 @@ import { userRoutes } from './routes/user.routes';
 
 const router = Router();
 
-router.get('/', (req, res, next) => {
-	try {
-		throw new Error('test handler');
-	} catch (error: any) {
-		error.place = 'Test';
-		error.status = 400;
-		next(error);
-	}
-});
-
 /* router.use('/auth', authRoutes); running the auth through /user instead */
 
 router.use('/post', postRoutes);
