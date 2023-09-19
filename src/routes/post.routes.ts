@@ -8,5 +8,6 @@ const router = Router();
 
 router.use(isAuthenticated);
 router.post('/', validateSchema(createPostSchema), postController.create);
+router.put('/:id', postController.update);
 
 export { router as postRoutes };

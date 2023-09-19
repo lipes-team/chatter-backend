@@ -19,9 +19,14 @@ describe('Posts Controller', () => {
 		text: `Harness the elegance of async/await, a game-changing duo that simplifies asynchronous programming. 
 			 With async functions and await keyword, you can write smoother, more readable code by handling promises gracefully. 
 			 Say goodbye to callback hell and embrace a structured, sequential approach to handling asynchronous tasks.`,
-		title: 'Mastering the Art of Asynchronous JavaScript',
 	};
+	const title = 'Mastering the Art of Asynchronous JavaScript';
 	let header = { authorization: '' };
+	let postId: string;
+	const postInfoExpect = {
+		_id: expect.any(String),
+		postType: 'PostBody',
+	};
 	beforeAll(async () => {
 		try {
 			const { app: application, db } = await initializeApp();
@@ -57,8 +62,25 @@ describe('Posts Controller', () => {
 		}
 	});
 
+	it('should create a new post', async () => {
+		const infoSend = { title, postBody };
+		const route = '/post';
+
+		const expectRes = {
+			title: expect.any(String),
+			postInfo: expect.any(Array<String>),
+		};
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route, header });
+			postId = res.body._id;
+			expectStatus(res, 201);
+			expectResponseBody(res, expectRes);
+		}
+	});
+
 	it(`shouldn't create a new post without the Authorization Token`, async () => {
-		const infoSend = { title: postBody.title, postBody };
+		const infoSend = { title, postBody };
 		const route = '/post';
 
 		const expectRes = {
@@ -77,7 +99,7 @@ describe('Posts Controller', () => {
 	});
 
 	it(`shouldn't create a new post with an expired token`, async () => {
-		const infoSend = { title: postBody.title, postBody };
+		const infoSend = { title, postBody };
 		const route = '/post';
 
 		const headers = { ...header };
@@ -100,7 +122,7 @@ describe('Posts Controller', () => {
 	});
 
 	it(`shouldn't create a new post with an invalid signature`, async () => {
-		const infoSend = { title: postBody.title, postBody };
+		const infoSend = { title, postBody };
 		const route = '/post';
 
 		const headers = { ...header };
@@ -123,7 +145,7 @@ describe('Posts Controller', () => {
 	});
 
 	it(`shouldn't create a new post with a malformed token`, async () => {
-		const infoSend = { title: postBody.title, postBody };
+		const infoSend = { title, postBody };
 		const route = '/post';
 
 		const headers = { ...header };
@@ -141,22 +163,6 @@ describe('Posts Controller', () => {
 		if (app) {
 			const res = await postRequest({ app, infoSend, route, header: headers });
 			expectStatus(res, 401);
-			expectResponseBody(res, expectRes);
-		}
-	});
-
-	it('should create a new post', async () => {
-		const infoSend = { title: postBody.title, postBody };
-		const route = '/post';
-
-		const expectRes = {
-			title: expect.any(String),
-			postInfo: expect.any(Array<String>),
-		};
-
-		if (app) {
-			const res = await postRequest({ app, infoSend, route, header });
-			expectStatus(res, 201);
 			expectResponseBody(res, expectRes);
 		}
 	});
@@ -190,10 +196,12 @@ describe('Posts Controller', () => {
 	});
 
 	it("shouldn't create a new post without the title", async () => {
-		const infoSend: { postBody: Partial<typeof postBody>; title?: string } = {
+		const infoSend: {
+			postBody: typeof postBody;
+			title?: string;
+		} = {
 			postBody: { ...postBody },
 		};
-		delete infoSend.postBody.title;
 		const route = '/post';
 		const error = {
 			errors: [
@@ -233,7 +241,7 @@ describe('Posts Controller', () => {
 	it("shouldn't create a new post without the text", async () => {
 		const infoSend: { postBody: Partial<typeof postBody>; title: string } = {
 			postBody: { ...postBody },
-			title: postBody.title,
+			title,
 		};
 		delete infoSend.postBody.text;
 		const route = '/post';
@@ -265,10 +273,83 @@ describe('Posts Controller', () => {
 			],
 			path: 'Validation',
 		};
+
 		if (app) {
 			const res = await postRequest({ app, infoSend, route, header });
 			expectStatus(res, 400);
 			expectResponseBody(res, errorEmpyText);
+		}
+	});
+
+	it(`should update post title`, async () => {
+		const infoSend = { title: 'Updated title' };
+		const route = `/post/${postId}`;
+
+		const expectedRes = {
+			title: 'Updated title',
+			postInfo: expect.any(Array<typeof postInfoExpect>),
+		};
+
+		if (app) {
+			const res = await putRequest({ app, infoSend, route, header });
+			expectStatus(res, 200);
+			expectResponseBody(res, expectedRes);
+		}
+	});
+
+	it(`should update the post info`, async () => {
+		const infoSend = { postBody: { ...postBody } };
+		const route = `/post/${postId}`;
+
+		const expectedRes = {
+			title: 'Updated title',
+			postInfo: expect.any(Array<typeof postInfoExpect>),
+		};
+
+		if (app) {
+			const res = await putRequest({ app, infoSend, route, header });
+			expectStatus(res, 200);
+			expectResponseBody(res, expectedRes);
+			expect(res.body.postInfo).toHaveLength(2);
+		}
+	});
+
+	it(`should update the post info and the title`, async () => {
+		const infoSend = {
+			postBody: { ...postBody },
+			title: 'Updates simultaneously',
+		};
+		const route = `/post/${postId}`;
+
+		const expectedRes = {
+			title: 'Updates simultaneously',
+			postInfo: expect.any(Array<typeof postInfoExpect>),
+		};
+
+		if (app) {
+			const res = await putRequest({ app, infoSend, route, header });
+			expectStatus(res, 200);
+			expectResponseBody(res, expectedRes);
+			expect(res.body.postInfo).toHaveLength(3);
+		}
+	});
+
+	it(`shouldn't update a post without the Authorization Token`, async () => {
+		const infoSend = { title, postBody };
+		const route = `/post/${postId}`;
+
+		const expectRes = {
+			errors: [
+				{
+					message: 'No authorization token was found',
+				},
+			],
+		};
+
+		if (app) {
+			const res = await putRequest({ app, infoSend, route });
+			expectStatus(res, 401);
+			expectResponseBody(res, expectRes);
 		}
 	});
 });
