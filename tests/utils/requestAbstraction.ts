@@ -3,7 +3,7 @@ import { Express } from 'express';
 
 export type RequestTypes = {
 	app: Express;
-	infoSend: string | object;
+	infoSend?: string | object;
 	route: string;
 	header?: {};
 };
