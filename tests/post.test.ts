@@ -61,7 +61,7 @@ describe('Posts Controller', () => {
 		const infoSend = { title: postBody.title, postBody };
 		const route = '/post';
 
-		const expecxtRes = {
+		const expectRes = {
 			errors: [
 				{
 					message: 'No authorization token was found',
@@ -72,7 +72,7 @@ describe('Posts Controller', () => {
 		if (app) {
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 401);
-			expectResponseBody(res, expecxtRes);
+			expectResponseBody(res, expectRes);
 		}
 	});
 
@@ -84,7 +84,7 @@ describe('Posts Controller', () => {
 
 		headers.authorization = `Bearer ${process.env.EXPIRED!}`;
 
-		const expecxtRes = {
+		const expectRes = {
 			errors: [
 				{
 					message: 'jwt expired',
@@ -95,7 +95,53 @@ describe('Posts Controller', () => {
 		if (app) {
 			const res = await postRequest({ app, infoSend, route, header: headers });
 			expectStatus(res, 401);
-			expectResponseBody(res, expecxtRes);
+			expectResponseBody(res, expectRes);
+		}
+	});
+
+	it(`shouldn't create a new post with an invalid signature`, async () => {
+		const infoSend = { title: postBody.title, postBody };
+		const route = '/post';
+
+		const headers = { ...header };
+
+		headers.authorization = `Bearer ${process.env.EXPIRED!.slice(0, -3)}`;
+
+		const expectRes = {
+			errors: [
+				{
+					message: 'invalid signature',
+				},
+			],
+		};
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route, header: headers });
+			expectStatus(res, 401);
+			expectResponseBody(res, expectRes);
+		}
+	});
+
+	it(`shouldn't create a new post with a malformed token`, async () => {
+		const infoSend = { title: postBody.title, postBody };
+		const route = '/post';
+
+		const headers = { ...header };
+
+		headers.authorization = `Bearer faketokenlalala.243543$lknmvlwie`;
+
+		const expectRes = {
+			errors: [
+				{
+					message: 'jwt malformed',
+				},
+			],
+		};
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route, header: headers });
+			expectStatus(res, 401);
+			expectResponseBody(res, expectRes);
 		}
 	});
 
@@ -103,7 +149,7 @@ describe('Posts Controller', () => {
 		const infoSend = { title: postBody.title, postBody };
 		const route = '/post';
 
-		const expecxtRes = {
+		const expectRes = {
 			title: expect.any(String),
 			postInfo: expect.any(Array<String>),
 		};
@@ -111,7 +157,7 @@ describe('Posts Controller', () => {
 		if (app) {
 			const res = await postRequest({ app, infoSend, route, header });
 			expectStatus(res, 201);
-			expectResponseBody(res, expecxtRes);
+			expectResponseBody(res, expectRes);
 		}
 	});
 
