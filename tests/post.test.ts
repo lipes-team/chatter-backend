@@ -3,7 +3,6 @@ import { Express } from 'express';
 
 import { disconnectDB } from '../src/database/connection';
 import {
-	getRequest,
 	postRequest,
 	putRequest,
 	deleteRequest,
@@ -93,6 +92,7 @@ describe('Posts Controller', () => {
 		}
 	});
 
+	// ==================== CREATE TESTS ====================
 	it('should create a new post', async () => {
 		const infoSend = { title, postBody };
 		const route = '/post';
@@ -312,6 +312,7 @@ describe('Posts Controller', () => {
 		}
 	});
 
+	// ==================== UPDATE TESTS ====================
 	it(`should update post title`, async () => {
 		const infoSend = { title: 'Updated title' };
 		const route = `/post/${postId}`;
@@ -409,6 +410,71 @@ describe('Posts Controller', () => {
 			const res = await putRequest({ app, infoSend, route });
 			expectStatus(res, 401);
 			expectResponseBody(res, expectRes);
+		}
+	});
+
+	// ==================== DELETE TESTS ====================
+	it(`shouldn't delete a post from another user`, async () => {
+		const infoSend = { title, postBody };
+		const route = `/post/${postId}`;
+
+		const expectRes = {
+			errors: [
+				{
+					message: `The post was deleted and/or you aren't the owner`,
+				},
+			],
+			path: 'Delete a post',
+		};
+
+		if (app) {
+			const res = await deleteRequest({
+				app,
+				infoSend,
+				route,
+				header: differentUserHeader,
+			});
+			expectStatus(res, 401);
+			expectResponseBody(res, expectRes);
+		}
+	});
+
+	it(`shouldn't delete a post with the wrong ID`, async () => {
+		const infoSend = { title, postBody };
+		const route = `/post/${postId.slice(0, -3)}`;
+
+		const expectRes = {
+			errors: [
+				{
+					message: 'Invalid Id',
+					path: ['params', 'id', 'Delete'],
+				},
+			],
+			path: 'Validation',
+		};
+
+		if (app) {
+			const res = await deleteRequest({
+				app,
+				infoSend,
+				route,
+				header,
+			});
+			expectStatus(res, 400);
+			expectResponseBody(res, expectRes);
+		}
+	});
+
+	it(`should delete a post`, async () => {
+		const route = `/post/${postId}`;
+
+		if (app) {
+			const res = await deleteRequest({
+				app,
+				route,
+				header,
+			});
+			expectStatus(res, 204);
 		}
 	});
 });
