@@ -1,5 +1,3 @@
-import { Post } from '../models/Post.model';
-import { PostBody } from '../models/PostBody.model';
 import { postService } from '../services/Post.service';
 import { postBodyService } from '../services/PostBody.service';
 import { RouteOpts } from '../utils/types';
