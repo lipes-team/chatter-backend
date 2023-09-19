@@ -22,8 +22,8 @@ const postBaseSchema = new Schema(
 interface PostBase {
 	text: string;
 	image?: string;
-	owner: Types.ObjectId;
-	post?: Types.ObjectId; // ?
+	owner: Types.ObjectId | string;
+	post?: Types.ObjectId | string; // ?
 }
 
 const postBase = model<PostBase>('PostBase', postBaseSchema);
