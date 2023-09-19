@@ -30,7 +30,9 @@ type PostModel = Model<Post>;
 
 type OptionalPost = OptionalArrays<Post, 'comments'>;
 type Required = RequiredArrays<OptionalPost, 'postInfo'>;
-type NewPost = Remover<Required, keyof Timestamps>;
+type NewPost = Remover<Required, keyof Timestamps | 'owner'> & {
+	owner: string;
+};
 
 const postModel = model('Post', postSchema);
 
