@@ -12,7 +12,8 @@ class PostController {
 			const { postBody, title } = req.body;
 			const owner = req.payload?.id!;
 			const newBody = await postBodyService.createPostBody({
-				...postBody,
+				text: postBody.text,
+				image: postBody.image,
 				owner,
 			});
 			const newPost = await postService.createPost({
@@ -65,6 +66,28 @@ class PostController {
 			res.status(200).json(updatedPost);
 		} catch (error: any) {
 			error.path = 'Update a post';
+			next(error);
+		}
+	}
+	async delete(
+		req: RouteOpts['payload'],
+		res: RouteOpts['res'],
+		next: RouteOpts['next']
+	) {
+		try {
+			const postId = req.params.id;
+			const owner = req.payload?.id!;
+			const deletedPost = await postService.deletePost({ _id: postId, owner });
+
+			if (deletedPost.deletedCount === 0) {
+				throw {
+					message: `The post was deleted and/or you aren't the owner`,
+					status: 401,
+				};
+			}
+			res.sendStatus(204);
+		} catch (error: any) {
+			error.path = 'Delete a post';
 			next(error);
 		}
 	}
