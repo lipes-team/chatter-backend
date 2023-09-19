@@ -12,7 +12,7 @@ import {
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
 import { logger } from '../src/utils/logger';
 import { initializeApp } from '../app';
-import { findOne, find, addToDb } from '../src/database/abstraction';
+import { findOne, find, addToDb, update } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
 import { userService } from '../src/services/User.service';
 
@@ -173,4 +173,46 @@ describe.only('User Services', () => {
 			expectStatus(res, 200);
 		}
 	});
+
+	it("SERVICE (Update): Should update user info in db", async () => {
+		const oldInfo = {
+			name: 'Jane Doe',
+			password: 'TestTest123',
+			email: 'uniquejane@email.com',
+		};
+
+		const newInfo = {
+			name: "Updated Jane Doe",
+			password: "TestUpdate123",
+			email: "updatejanedoe@email.com"
+		};
+
+		const oldUser = await userService.findUser(oldInfo.email);
+		const newUser = await userService.updateUser(oldInfo.email, newInfo);
+
+		if (oldUser) {
+			expect(newUser).not.toMatchObject(oldUser)
+		}
+	})
+
+	it("CONTROLLER (Update): Should responde with 200", async () => {
+		const infoSend = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'uniquejane@email.com',
+		};
+
+		const newInfo = {
+			name: "Updated Jane Doe",
+			password: "TestUpdate123",
+			email: "updatejanedoe@email.com"
+		};
+
+		const route = '/user/update';
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 200);
+		}
+	})
 });
