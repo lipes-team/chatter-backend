@@ -4,23 +4,23 @@ export type OptionalArrays<TModel, KeysToChange extends keyof TModel> = Omit<
 	TModel,
 	KeysToChange
 > & {
-		[key in KeysToChange]?: TModel[key] extends Array<infer TArray>
+	[key in KeysToChange]?: TModel[key] extends Array<infer TArray>
 		? TArray[] extends Types.ObjectId[]
-		? string[] | string | Types.ObjectId[] | Types.ObjectId
-		: TArray[]
+			? string[] | string | Types.ObjectId[] | Types.ObjectId
+			: TArray[]
 		: TModel[key];
-	};
+};
 
 export type RequiredArrays<TModel, KeysToChange extends keyof TModel> = Omit<
 	TModel,
 	KeysToChange
 > & {
-		[key in KeysToChange]: TModel[key] extends Array<infer TArray>
+	[key in KeysToChange]: TModel[key] extends Array<infer TArray>
 		? TArray[] extends Types.ObjectId[]
-		? string[] | string | Types.ObjectId[] | Types.ObjectId
-		: TArray[]
+			? string[] | string | Types.ObjectId[] | Types.ObjectId
+			: TArray[]
 		: TModel[key];
-	};
+};
 
 export type FilterOptions<TModel> = FilterQuery<TModel> & {
 	_id?: string | Types.ObjectId | Types.ObjectId[];
