@@ -11,7 +11,10 @@ class PostController {
 		try {
 			const { postBody, title } = req.body;
 			const owner = req.payload?.id!;
-			const newBody = await postBodyService.createPostBody(postBody);
+			const newBody = await postBodyService.createPostBody({
+				...postBody,
+				owner,
+			});
 			const newPost = await postService.createPost({
 				title,
 				postInfo: newBody._id,
@@ -31,10 +34,18 @@ class PostController {
 	) {
 		const postId = req.params.id;
 		const { title, postBody } = req.body;
-		let newBody = postBody && (await postBodyService.createPostBody(postBody));
+		const owner = req.payload?.id!;
 		try {
+			const newBody =
+				postBody &&
+				(await postBodyService.createPostBody({
+					text: postBody.text,
+					image: postBody.image,
+					owner,
+				}));
+
 			const updatedPost = await postService.findPostAndUpdate(
-				{ _id: postId, owner: req.payload?.id },
+				{ _id: postId, owner },
 				{ title, $addToSet: { postInfo: newBody } },
 				{
 					new: true,
@@ -45,7 +56,12 @@ class PostController {
 					},
 				}
 			);
-
+			if (updatedPost === null) {
+				throw {
+					message: `The post was deleted and/or you aren't the owner`,
+					status: 401,
+				};
+			}
 			res.status(200).json(updatedPost);
 		} catch (error: any) {
 			error.path = 'Update a post';

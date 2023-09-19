@@ -27,24 +27,55 @@ describe('Posts Controller', () => {
 		_id: expect.any(String),
 		postType: 'PostBody',
 	};
+	let differentUserHeader = { authorization: '' };
 	beforeAll(async () => {
 		try {
 			const { app: application, db } = await initializeApp();
 			database = db;
 			app = application;
+
 			const newUser = {
 				name: 'Felipe',
 				email: 'felipe@gmail.com',
 				password: 'Aa123456!',
 			};
 
-			await postRequest({ app, infoSend: newUser, route: '/user/signup' });
-			const res = await postRequest({
+			const differentUser = {
+				name: 'Felipe',
+				email: 'felipe2@gmail.com',
+				password: 'Aa123456!',
+			};
+
+			const firstUser = postRequest({
+				app,
+				infoSend: newUser,
+				route: '/user/signup',
+			});
+			const secondUser = postRequest({
+				app,
+				infoSend: differentUser,
+				route: '/user/signup',
+			});
+			await Promise.all([firstUser, secondUser]);
+
+			const firstUserRes = postRequest({
 				app,
 				infoSend: newUser,
 				route: '/user/login',
 			});
-			header.authorization = `Bearer ${res.body.authToken}`;
+			const secondUserRes = postRequest({
+				app,
+				infoSend: differentUser,
+				route: '/user/login',
+			});
+
+			const [userHeader, differentHeader] = await Promise.all([
+				firstUserRes,
+				secondUserRes,
+			]);
+
+			header.authorization = `Bearer ${userHeader.body.authToken}`;
+			differentUserHeader.authorization = `Bearer ${differentHeader.body.authToken}`;
 		} catch (error) {
 			logger.error(error);
 			// TODO: should throw an error here too?
@@ -331,6 +362,34 @@ describe('Posts Controller', () => {
 			expectStatus(res, 200);
 			expectResponseBody(res, expectedRes);
 			expect(res.body.postInfo).toHaveLength(3);
+		}
+	});
+
+	it(`shouldn't update the post you don't own`, async () => {
+		const infoSend = {
+			postBody: { ...postBody },
+			title: 'Updates simultaneously',
+		};
+		const route = `/post/${postId}`;
+
+		const expectedRes = {
+			errors: [
+				{
+					message: `The post was deleted and/or you aren't the owner`,
+				},
+			],
+			path: 'Update a post',
+		};
+
+		if (app) {
+			const res = await putRequest({
+				app,
+				infoSend,
+				route,
+				header: differentUserHeader,
+			});
+			expectStatus(res, 401);
+			expectResponseBody(res, expectedRes);
 		}
 	});
 
