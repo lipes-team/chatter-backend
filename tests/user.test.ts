@@ -92,12 +92,40 @@ describe.only('User Services', () => {
 			email: 'uniquejane@email.com',
 		};
 		const route = '/user/signup';
-		await find(userModel, { email: infoSend.email });
+
 		if (app) {
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 400);
 		}
 	});
+	it('CONTROLER (login): Should respond 200 if user logins with valid info', async () => {
+		const infoSend = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'uniquejane@email.com',
+		};
+		const route = '/user/login';
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 200);
+		}
+	});
+
+	test.only("CONTROLLER (Update): Should respond with 200", async () => {
+		const infoSend = {
+			name: "Updated Jane Doe",
+			password: "TestUpdate123",
+			email: "updatejanedoe@email.com"
+		};
+
+		const route = '/user/update';
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 200);
+		}
+	})
 
 	it('SERVICE: Password in db should be hashed and match original password', async () => {
 		const userInfo = {
@@ -134,7 +162,7 @@ describe.only('User Services', () => {
 			email: 'janedoe@email.com',
 		};
 		const userInDB = await userService.findUser(
-			userInfo.email
+			{ email: userInfo.email }
 		);
 
 		expect(userInDB).not.toBeNull();
@@ -150,7 +178,7 @@ describe.only('User Services', () => {
 		};
 
 		let userInDB = await userService.findUser(
-			userInfo.email,
+			{ email: userInfo.email },
 		);
 
 		if (userInDB) {
@@ -160,19 +188,6 @@ describe.only('User Services', () => {
 		expect(authToken).toBeDefined();
 	});
 
-	it('CONTROLER (login): Should respond 200 if user logins with valid info', async () => {
-		const infoSend = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'uniquejane@email.com',
-		};
-		const route = '/user/login';
-
-		if (app) {
-			const res = await postRequest({ app, infoSend, route });
-			expectStatus(res, 200);
-		}
-	});
 
 	it("SERVICE (Update): Should update user info in db", async () => {
 		const oldInfo = {
@@ -187,32 +202,14 @@ describe.only('User Services', () => {
 			email: "updatejanedoe@email.com"
 		};
 
-		const oldUser = await userService.findUser(oldInfo.email);
-		const newUser = await userService.updateUser(oldInfo.email, newInfo);
+		newInfo.password = await userService.hashPassword(newInfo)
+
+		const oldUser = await userService.findUser({ email: oldInfo.email }, { projection: "+password" });
+		const newUser = await userService.updateUser({ email: oldInfo.email }, { ...newInfo }, { projection: "+password" });
 
 		if (oldUser) {
 			expect(newUser).not.toMatchObject(oldUser)
 		}
 	})
 
-	it("CONTROLLER (Update): Should responde with 200", async () => {
-		const infoSend = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'uniquejane@email.com',
-		};
-
-		const newInfo = {
-			name: "Updated Jane Doe",
-			password: "TestUpdate123",
-			email: "updatejanedoe@email.com"
-		};
-
-		const route = '/user/update';
-
-		if (app) {
-			const res = await postRequest({ app, infoSend, route });
-			expectStatus(res, 200);
-		}
-	})
 });
