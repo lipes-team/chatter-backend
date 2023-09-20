@@ -1,12 +1,19 @@
 import { NextFunction, Request, Response } from 'express';
+import { JwtPayload } from 'jsonwebtoken';
 
 export type RouteOpts = {
 	error: ErrorOpts;
 	req: Request;
 	res: Response;
 	next: NextFunction;
-	payload: Request; // add the payload
+	payload: Request & { payload?: payload };
 };
+
+interface payload extends JwtPayload {
+	name: string;
+	email: string;
+	id: string;
+}
 
 type ErrorOpts = {
 	path: string; // place? path? location?
