@@ -9,7 +9,7 @@ const router = Router();
 
 /* router.use('/auth', authRoutes); running the auth through /user instead */
 
-router.use('/post', postRoutes);
+router.use('/posts', postRoutes);
 
 router.use('/user', userRoutes);
 

@@ -9,16 +9,12 @@ class PostController {
 		next: RouteOpts['next']
 	) {
 		try {
-			const { postBody, title } = req.body;
+			const { activePost, title } = req.body;
 			const owner = req.payload?.id!;
-			const newBody = await postBodyService.createPostBody({
-				text: postBody.text,
-				image: postBody.image,
-				owner,
-			});
+
 			const newPost = await postService.createPost({
 				title,
-				postInfo: newBody._id,
+				activePost,
 				owner,
 			});
 			return res.status(201).json(newPost);
@@ -34,29 +30,18 @@ class PostController {
 		next: RouteOpts['next']
 	) {
 		const postId = req.params.id;
-		const { title, postBody } = req.body;
+		const { title, editPropose } = req.body;
 		const owner = req.payload?.id!;
 		try {
-			const newBody =
-				postBody &&
-				(await postBodyService.createPostBody({
-					text: postBody.text,
-					image: postBody.image,
-					owner,
-				}));
-
 			const updatedPost = await postService.findPostAndUpdate(
 				{ _id: postId, owner },
-				{ title, $addToSet: { postInfo: newBody } },
+				{ title, editPropose, toUpdate: true },
 				{
 					new: true,
 					lean: true,
-					populate: {
-						path: 'postInfo',
-						options: { sort: { createdAt: -1 } },
-					},
 				}
 			);
+
 			if (updatedPost === null) {
 				throw {
 					message: `The post was deleted and/or you aren't the owner`,
@@ -69,6 +54,7 @@ class PostController {
 			next(error);
 		}
 	}
+
 	async delete(
 		req: RouteOpts['payload'],
 		res: RouteOpts['res'],
