@@ -1,5 +1,4 @@
 import { postService } from '../services/Post.service';
-import { postBodyService } from '../services/PostBody.service';
 import { RouteOpts } from '../utils/types';
 
 class PostController {
