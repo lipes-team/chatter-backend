@@ -8,6 +8,11 @@ import { testIdSchema } from '../validation/id.schema';
 const router = Router();
 
 router.use(isAuthenticated);
+router.get(
+	'/:id',
+	validateSchema(testIdSchema('Get one')),
+	postController.getOne
+);
 router.post('/', validateSchema(createPostSchema), postController.create);
 router.put(
 	'/:id',

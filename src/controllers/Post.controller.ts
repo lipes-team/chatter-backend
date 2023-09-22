@@ -23,6 +23,23 @@ class PostController {
 		}
 	}
 
+	async getOne(
+		req: RouteOpts['payload'],
+		res: RouteOpts['res'],
+		next: RouteOpts['next']
+	) {
+		try {
+			const { id } = req.params;
+
+			const postFound = await postService.findOnePost({ _id: id });
+
+			res.status(200).json(postFound);
+		} catch (error: any) {
+			error.path = 'Get one post';
+			next(error);
+		}
+	}
+
 	async update(
 		req: RouteOpts['payload'],
 		res: RouteOpts['res'],
@@ -63,8 +80,7 @@ class PostController {
 			const postId = req.params.id;
 			const owner = req.payload?.id!;
 			const deletedPost = await postService.deletePost({ _id: postId, owner });
-
-			if (deletedPost.deletedCount === 0) {
+			if (!deletedPost) {
 				throw {
 					message: `The post was deleted and/or you aren't the owner`,
 					status: 401,

@@ -24,6 +24,10 @@ class PostService {
 		return addToDb(this.postModel, newPost);
 	}
 
+	async findOnePost(filter: Filter, options?: Options) {
+		return findOne(this.postModel, filter, options);
+	}
+
 	async findPostAndUpdate(
 		filter: Filter,
 		updateData: Update,

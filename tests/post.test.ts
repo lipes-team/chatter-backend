@@ -6,6 +6,7 @@ import {
 	postRequest,
 	putRequest,
 	deleteRequest,
+	getRequest,
 } from './utils/requestAbstraction';
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
 import { logger } from '../src/utils/logger';
@@ -550,6 +551,74 @@ describe('Posts Controller', () => {
 				header,
 			});
 			expectStatus(res, 204);
+		}
+	});
+
+	// ==================== READ POST TESTS ====================
+	it(`should get one post by ID`, async () => {
+		const postToCreate = {
+			...postBody,
+			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
+		const postRoute = `${route}/${newPost._id}`;
+
+		const expectedRes = {
+			activePost: {
+				text: postToCreate.activePost.text,
+			},
+			status: 'pending',
+		};
+
+		if (app) {
+			const res = await getRequest({
+				app,
+				route: postRoute,
+				header,
+			});
+
+			expectStatus(res, 200);
+			expectResponseBody(res, expectedRes);
+		}
+	});
+
+	it(`shouldn't get one post by invalid ID`, async () => {
+		const postToCreate = {
+			...postBody,
+			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
+		const expectRes = {
+			errors: [
+				{
+					message: 'Invalid Id',
+					path: ['params', 'id', 'Get one'],
+				},
+			],
+			path: 'Validation',
+		};
+
+		const postRoute = `${route}/${newPost._id.toString().slice(0, -3)}`;
+
+		if (app) {
+			const res = await getRequest({
+				app,
+				route: postRoute,
+				header,
+			});
+
+			expectStatus(res, 400);
+			expectResponseBody(res, expectRes);
 		}
 	});
 });
