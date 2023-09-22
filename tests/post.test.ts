@@ -10,6 +10,7 @@ import {
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
 import { logger } from '../src/utils/logger';
 import { initializeApp } from '../app';
+import { postService } from '../src/services/Post.service';
 
 describe('Posts Controller', () => {
 	let database: Connection | undefined;
@@ -24,7 +25,7 @@ describe('Posts Controller', () => {
 	};
 
 	const route = '/posts';
-	let postId: string;
+	let userId: string;
 	let header = { authorization: '' };
 	let differentUserHeader = { authorization: '' };
 	beforeAll(async () => {
@@ -50,12 +51,14 @@ describe('Posts Controller', () => {
 				infoSend: newUser,
 				route: '/user/signup',
 			});
+
 			const secondUser = postRequest({
 				app,
 				infoSend: differentUser,
 				route: '/user/signup',
 			});
-			await Promise.all([firstUser, secondUser]);
+			const [firstId] = await Promise.all([firstUser, secondUser]);
+			userId = firstId.body._id;
 
 			const firstUserRes = postRequest({
 				app,
@@ -102,7 +105,6 @@ describe('Posts Controller', () => {
 
 		if (app) {
 			const res = await postRequest({ app, infoSend, route, header });
-			postId = res.body._id.toString();
 			expectStatus(res, 201);
 			expectResponseBody(res, expectRes);
 		}
@@ -309,8 +311,18 @@ describe('Posts Controller', () => {
 
 	// ==================== UPDATE POST TESTS ====================
 	it(`should update post title`, async () => {
+		const postToCreate = {
+			...postBody,
+			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
 		const infoSend = { title: 'Updated title' };
-		const postRoute = `${route}/${postId}`;
+		const postRoute = `${route}/${newPost._id}`;
 
 		if (app) {
 			const res = await putRequest({ app, infoSend, route: postRoute, header });
@@ -320,11 +332,20 @@ describe('Posts Controller', () => {
 	});
 
 	it(`should update the post info`, async () => {
+		const postToCreate = {
+			...postBody,
+			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
+		const postRoute = `${route}/${newPost._id}`;
 		const infoSend = { editPropose: { ...postBody.activePost } };
-		const postRoute = `${route}/${postId}`;
 
 		const expectedRes = {
-			title: 'Updated title',
 			editPropose: {
 				text: infoSend.editPropose.text,
 			},
@@ -339,16 +360,29 @@ describe('Posts Controller', () => {
 	});
 
 	it(`should update the post info and the title`, async () => {
-		const infoSend = {
+		const postToCreate = {
+			...postBody,
 			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
+		const postRoute = `${route}/${newPost._id}`;
+
+		const infoSend = {
+			editPropose: {
+				text: 'Edit proposal',
+			},
 			title: 'Updates simultaneously',
 		};
-		const postRoute = `${route}/${postId}`;
 
 		const expectedRes = {
 			title: 'Updates simultaneously',
 			editPropose: {
-				text: infoSend.activePost.text,
+				text: 'Edit proposal',
 			},
 			toUpdate: true,
 		};
@@ -365,7 +399,18 @@ describe('Posts Controller', () => {
 			activePost: { ...postBody.activePost },
 			title: 'Updates simultaneously',
 		};
-		const postRoute = `${route}/${postId}`;
+
+		const postToCreate = {
+			...postBody,
+			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
+		const postRoute = `${route}/${newPost._id}`;
 
 		const expectedRes = {
 			errors: [
@@ -389,8 +434,18 @@ describe('Posts Controller', () => {
 	});
 
 	it(`shouldn't update a post without the Authorization Token`, async () => {
+		const postToCreate = {
+			...postBody,
+			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
+		const postRoute = `${route}/${newPost._id}`;
 		const infoSend = { ...postBody, activePost: { ...postBody.activePost } };
-		const postRoute = `${route}/${postId}`;
 
 		const expectRes = {
 			errors: [
@@ -409,8 +464,17 @@ describe('Posts Controller', () => {
 
 	// ==================== DELETE POST TESTS ====================
 	it(`shouldn't delete a post from another user`, async () => {
-		const infoSend = { ...postBody, activePost: { ...postBody.activePost } };
-		const postRoute = `${route}/${postId}`;
+		const postToCreate = {
+			...postBody,
+			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
+		const postRoute = `${route}/${newPost._id}`;
 
 		const expectRes = {
 			errors: [
@@ -424,7 +488,6 @@ describe('Posts Controller', () => {
 		if (app) {
 			const res = await deleteRequest({
 				app,
-				infoSend,
 				route: postRoute,
 				header: differentUserHeader,
 			});
@@ -434,8 +497,17 @@ describe('Posts Controller', () => {
 	});
 
 	it(`shouldn't delete a post with the wrong ID`, async () => {
-		const infoSend = { ...postBody, activePost: { ...postBody.activePost } };
-		const postRoute = `${route}/${postId.slice(0, -3)}`;
+		const postToCreate = {
+			...postBody,
+			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
+		const postRoute = `${route}/${newPost._id.toString().slice(0, -3)}`;
 
 		const expectRes = {
 			errors: [
@@ -450,7 +522,6 @@ describe('Posts Controller', () => {
 		if (app) {
 			const res = await deleteRequest({
 				app,
-				infoSend,
 				route: postRoute,
 				header,
 			});
@@ -460,7 +531,17 @@ describe('Posts Controller', () => {
 	});
 
 	it(`should delete a post`, async () => {
-		const postRoute = `${route}/${postId}`;
+		const postToCreate = {
+			...postBody,
+			activePost: { ...postBody.activePost },
+		};
+
+		const newPost = await postService.createPost({
+			...postToCreate,
+			owner: userId,
+		});
+
+		const postRoute = `${route}/${newPost._id}`;
 
 		if (app) {
 			const res = await deleteRequest({
