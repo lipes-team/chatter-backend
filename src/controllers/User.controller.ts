@@ -76,7 +76,7 @@ class UserController {
 			console.log(newUser)
 			const updatedUser = await userService.updateUser({ id }, newUser)
 
-			return res.status(200);
+			return res.status(200).json(updatedUser);
 		} catch (error: any) {
 			error.path = 'Login user';
 			next(error);
