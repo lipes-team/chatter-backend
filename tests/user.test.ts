@@ -19,6 +19,8 @@ import { userService } from '../src/services/User.service';
 describe.only('User Services', () => {
 	let database: Connection | undefined;
 	let app: Express | undefined;
+	let authToken = "";
+
 	beforeAll(async () => {
 		try {
 			const { app: application, db } = await initializeApp();
@@ -32,7 +34,13 @@ describe.only('User Services', () => {
 				email: 'uniquejane@email.com',
 			};
 
-			let user = await userService.createUser(userInfo);
+			await userService.createUser(userInfo);
+
+			authToken = userService.createAuthToken({
+				name: userInfo.name,
+				email: userInfo.email
+			})
+
 		} catch (error) {
 			logger.error(error);
 			// TODO: should throw an error here too?
@@ -112,7 +120,7 @@ describe.only('User Services', () => {
 		}
 	});
 
-	test.only("CONTROLLER (Update): Should respond with 200", async () => {
+	it("CONTROLLER (Update): Should respond with 200", async () => {
 		const infoSend = {
 			name: "Updated Jane Doe",
 			password: "TestUpdate123",
@@ -120,9 +128,13 @@ describe.only('User Services', () => {
 		};
 
 		const route = '/user/update';
+		const header = {
+			Authorization: `Bearer ${authToken}`
+		}
+		console.log(header)
 
 		if (app) {
-			const res = await postRequest({ app, infoSend, route });
+			const res = await postRequest({ app, infoSend, route, header });
 			expectStatus(res, 200);
 		}
 	})
