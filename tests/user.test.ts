@@ -16,7 +16,7 @@ import { findOne, find, addToDb, update } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
 import { userService } from '../src/services/User.service';
 
-describe.only('User Services', () => {
+describe('User Services', () => {
 	let database: Connection | undefined;
 	let app: Express | undefined;
 	let authToken = "";
