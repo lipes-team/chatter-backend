@@ -51,4 +51,4 @@ type Group = InferSchemaType<typeof groupSchema>
 
 const groupModel = model<Group>("Group", groupSchema)
 
-export { groupModel }
+export { groupModel, Group }
