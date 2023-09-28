@@ -17,14 +17,14 @@ const commentSchema = new Schema(
 			ref: 'Post',
 		},
 	},
-	{ timestamps: true, discriminatorKey: 'postType' }
+	{ timestamps: true }
 );
 
 interface Comment {
 	text: string;
 	image?: string;
 	owner: Types.ObjectId | string;
-	post?: Types.ObjectId | string; // ?
+	post: Types.ObjectId | string;
 }
 
 const comment = model<Comment>('PostBase', commentSchema);
