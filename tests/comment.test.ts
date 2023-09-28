@@ -13,15 +13,13 @@ import { logger } from '../src/utils/logger';
 import { initializeApp } from '../app';
 import { postService } from '../src/services/Post.service';
 import { userService } from '../src/services/User.service';
-import { Comment } from '../src/models/Comment.model';
+import { NewComment } from '../src/models/Comment.model';
 
 describe('Comments Controller', () => {
 	let database: Connection | undefined;
 	let app: Express | undefined;
-	const commentBody: Partial<Comment> = {
-		text: `Harness the elegance of async/await, a game-changing duo that simplifies asynchronous programming. 
-				 With async functions and await keyword, you can write smoother, more readable code by handling promises gracefully. 
-				 Say goodbye to callback hell and embrace a structured, sequential approach to handling asynchronous tasks.`,
+	const commentBody: Partial<NewComment> = {
+		text: `This content is really amazing!!`,
 	};
 	let postId: string;
 
@@ -138,7 +136,7 @@ describe('Comments Controller', () => {
 	describe('Create comment', () => {
 		it('should create a new comment', async () => {
 			const infoSend = { ...commentBody, post: postId };
-
+			const route = `${baseRoute}/${postId}`;
 			const expectedRes = {
 				text: commentBody.text,
 			};
@@ -147,7 +145,7 @@ describe('Comments Controller', () => {
 				const res = await postRequest({
 					app,
 					infoSend,
-					route: baseRoute,
+					route,
 					header,
 				});
 
@@ -156,10 +154,37 @@ describe('Comments Controller', () => {
 			}
 		});
 
+		it('should throw with invalid postId', async () => {
+			const infoSend = { ...commentBody };
+			const route = `${baseRoute}/${postId.slice(0, -5)}`;
+
+			const expectedRes = {
+				errors: [
+					{
+						message: 'Invalid Id',
+						path: ['params', 'id', 'Create Comment'],
+					},
+				],
+				path: 'Validation',
+			};
+
+			if (app) {
+				const res = await postRequest({
+					app,
+					infoSend,
+					route,
+					header,
+				});
+
+				expectStatus(res, 400);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
 		it('should throw an error when creating a comment without text', async () => {
 			const infoSend = { ...commentBody };
+			const route = `${baseRoute}/${postId}`;
 			delete infoSend.text;
-
 			const expectedRes = {
 				errors: [
 					{
@@ -176,7 +201,7 @@ describe('Comments Controller', () => {
 				const res = await postRequest({
 					app,
 					infoSend,
-					route: baseRoute,
+					route,
 					header,
 				});
 
@@ -187,6 +212,7 @@ describe('Comments Controller', () => {
 
 		it('should throw when text is an empty string', async () => {
 			const infoSend = { ...commentBody };
+			const route = `${baseRoute}/${postId}`;
 			infoSend.text = '';
 
 			const expectedRes = {
@@ -203,7 +229,7 @@ describe('Comments Controller', () => {
 				const res = await postRequest({
 					app,
 					infoSend,
-					route: baseRoute,
+					route,
 					header,
 				});
 
