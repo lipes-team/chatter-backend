@@ -1,4 +1,4 @@
-import { Schema, Types, model } from 'mongoose';
+import { InferSchemaType, Model, Schema, Types, model } from 'mongoose';
 
 const commentSchema = new Schema(
 	{
@@ -20,13 +20,14 @@ const commentSchema = new Schema(
 	{ timestamps: true }
 );
 
-interface Comment {
+interface NewComment {
 	text: string;
 	image?: string;
 	owner: Types.ObjectId | string;
 	post: Types.ObjectId | string;
 }
+type Comment = InferSchemaType<typeof commentSchema>;
+type CommentModel = Model<Comment>;
+const commentModel = model<Comment>('Comment', commentSchema);
 
-const comment = model<Comment>('PostBase', commentSchema);
-
-export { comment, Comment, commentSchema };
+export { commentModel, Comment, NewComment, CommentModel };
