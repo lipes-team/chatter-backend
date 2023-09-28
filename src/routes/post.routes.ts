@@ -7,7 +7,6 @@ import { testIdSchema } from '../validation/id.schema';
 
 const router = Router();
 
-router.use(isAuthenticated);
 router.get(
 	'/:id',
 	validateSchema(testIdSchema('Get one')),
