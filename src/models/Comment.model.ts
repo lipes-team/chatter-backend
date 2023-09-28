@@ -1,6 +1,6 @@
 import { Schema, Types, model } from 'mongoose';
 
-const postBaseSchema = new Schema(
+const commentSchema = new Schema(
 	{
 		text: {
 			type: String,
@@ -20,13 +20,13 @@ const postBaseSchema = new Schema(
 	{ timestamps: true, discriminatorKey: 'postType' }
 );
 
-interface PostBase {
+interface Comment {
 	text: string;
 	image?: string;
 	owner: Types.ObjectId | string;
 	post?: Types.ObjectId | string; // ?
 }
 
-const postBase = model<PostBase>('PostBase', postBaseSchema);
+const comment = model<Comment>('PostBase', commentSchema);
 
-export { postBase, PostBase, postBaseSchema };
+export { comment, Comment, commentSchema };
