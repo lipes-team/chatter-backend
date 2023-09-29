@@ -131,7 +131,6 @@ describe('User Services', () => {
 		const header = {
 			Authorization: `Bearer ${authToken}`
 		}
-		console.log(header)
 
 		if (app) {
 			const res = await postRequest({ app, infoSend, route, header });

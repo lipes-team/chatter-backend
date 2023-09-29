@@ -73,7 +73,6 @@ class UserController {
 				email: req.body.email
 			}
 
-			console.log(newUser)
 			const updatedUser = await userService.updateUser({ id }, newUser)
 
 			return res.status(200).json(updatedUser);
