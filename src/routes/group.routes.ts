@@ -6,6 +6,11 @@ import { groupController } from '../controllers/Group.controller';
 const router = Router();
 
 //TODO: Add Zod Validation
-router.post('/create', /* validateSchema(createGroupSchema), */ isAuthenticated, groupController.create);
+router.post(
+    '/create',
+    /* validateSchema(createGroupSchema), */
+    isAuthenticated,
+    groupController.create
+);
 
 export { router as groupRoutes };

@@ -4,6 +4,7 @@ import { errorHandling } from './routes/errorHandling.routes';
 import { RouteOpts } from './utils/types';
 import { postRoutes } from './routes/post.routes';
 import { userRoutes } from './routes/user.routes';
+import { groupRoutes } from './routes/group.routes';
 
 const router = Router();
 
@@ -22,6 +23,8 @@ router.get('/', (req, res, next) => {
 router.use('/post', postRoutes);
 
 router.use('/user', userRoutes);
+
+router.use('/group', groupRoutes);
 
 router.use(
 	(
