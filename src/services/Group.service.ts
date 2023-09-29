@@ -8,7 +8,7 @@ class GroupService {
         this.groupModel = groupModel
     }
 
-    async createGroup(newGroup: Group) {
+    async create(newGroup: Group) {
         return addToDb(this.groupModel, newGroup)
     }
 }
