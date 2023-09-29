@@ -1,4 +1,5 @@
-import { Schema, model, InferSchemaType, Model } from 'mongoose';
+import { Schema, model, InferSchemaType, Model, Types } from 'mongoose';
+import { Remover } from '../utils/types';
 
 const groupSchema = new Schema(
     {
@@ -16,7 +17,7 @@ const groupSchema = new Schema(
         //user references by role
         users: [
             {
-                userRef: {
+                user: {
                     type: Schema.Types.ObjectId,
                     ref: "User",
                     required: true //true because there will always be atleast ONE (the creator)
@@ -40,15 +41,21 @@ const groupSchema = new Schema(
         posts: [{
             type: Schema.Types.ObjectId,
             ref: "Post",
-            required: true
         }]
 
     },
     { timestamps: true }
 );
 
-type Group = InferSchemaType<typeof groupSchema>
+type GroupInferred = InferSchemaType<typeof groupSchema>
 
-const groupModel = model<Group>("Group", groupSchema)
+type Group = Remover<GroupInferred, "users" | "createdAt" | "updatedAt"> & {
+    users: Array<{
+        user: String | Types.ObjectId;
+        role: "Manager" | "Moderator" | "Veteran" | "New user"
+    }>
+}
 
-export { groupModel, Group }
+const groupModel = model<GroupInferred>("Group", groupSchema)
+
+export { groupModel, GroupInferred, Group }
