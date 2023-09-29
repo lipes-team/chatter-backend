@@ -1,4 +1,4 @@
-import { Connection, Types } from 'mongoose';
+import { Connection } from 'mongoose';
 import { Express } from 'express';
 
 import { disconnectDB } from '../src/database/connection';
@@ -68,7 +68,7 @@ describe('Comments Controller', () => {
 				},
 				title: 'Mastering the Art of Asynchronous JavaScript',
 			};
-
+			//TODO: Check if should change to model instead of service
 			postId = (
 				await postService.createPost({ ...newPost, owner: userId })
 			)._id.toString();

@@ -26,6 +26,7 @@ interface NewComment {
 	owner: Types.ObjectId | string;
 	post: Types.ObjectId | string;
 }
+// TODO: Change naming for models
 type Comment = InferSchemaType<typeof commentSchema>;
 type CommentModel = Model<Comment>;
 const commentModel = model<Comment>('Comment', commentSchema);

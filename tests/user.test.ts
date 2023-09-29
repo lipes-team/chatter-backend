@@ -16,17 +16,18 @@ import { findOne, find, addToDb, update } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
 import { userService } from '../src/services/User.service';
 
+// TODO: refactor to organize the tests inside different describes
 describe.only('User Services', () => {
 	let database: Connection | undefined;
 	let app: Express | undefined;
-	let authToken = "";
+	let authToken = '';
 
 	beforeAll(async () => {
 		try {
 			const { app: application, db } = await initializeApp();
 			database = db;
 			app = application;
-			await userModel.ensureIndexes();  //ensure mongoose validation based on userModel
+			await userModel.ensureIndexes(); //ensure mongoose validation based on userModel
 
 			let userInfo = {
 				name: 'Jane Doe',
@@ -38,9 +39,8 @@ describe.only('User Services', () => {
 
 			authToken = userService.createAuthToken({
 				name: userInfo.name,
-				email: userInfo.email
-			})
-
+				email: userInfo.email,
+			});
 		} catch (error) {
 			logger.error(error);
 			// TODO: should throw an error here too?
@@ -120,24 +120,24 @@ describe.only('User Services', () => {
 		}
 	});
 
-	it("CONTROLLER (Update): Should respond with 200", async () => {
+	it('CONTROLLER (Update): Should respond with 200', async () => {
 		const infoSend = {
-			name: "Updated Jane Doe",
-			password: "TestUpdate123",
-			email: "updatejanedoe@email.com"
+			name: 'Updated Jane Doe',
+			password: 'TestUpdate123',
+			email: 'updatejanedoe@email.com',
 		};
 
 		const route = '/user/update';
 		const header = {
-			Authorization: `Bearer ${authToken}`
-		}
-		console.log(header)
+			Authorization: `Bearer ${authToken}`,
+		};
+		console.log(header);
 
 		if (app) {
 			const res = await postRequest({ app, infoSend, route, header });
 			expectStatus(res, 200);
 		}
-	})
+	});
 
 	it('SERVICE: Password in db should be hashed and match original password', async () => {
 		const userInfo = {
@@ -173,9 +173,7 @@ describe.only('User Services', () => {
 			password: 'TestTest123', //valid password
 			email: 'janedoe@email.com',
 		};
-		const userInDB = await userService.findUser(
-			{ email: userInfo.email }
-		);
+		const userInDB = await userService.findUser({ email: userInfo.email });
 
 		expect(userInDB).not.toBeNull();
 	});
@@ -189,19 +187,16 @@ describe.only('User Services', () => {
 			email: 'janedoe@email.com',
 		};
 
-		let userInDB = await userService.findUser(
-			{ email: userInfo.email },
-		);
+		let userInDB = await userService.findUser({ email: userInfo.email });
 
 		if (userInDB) {
-			authToken = userService.createAuthToken
+			authToken = userService.createAuthToken;
 		}
 
 		expect(authToken).toBeDefined();
 	});
 
-
-	it("SERVICE (Update): Should update user info in db", async () => {
+	it('SERVICE (Update): Should update user info in db', async () => {
 		const oldInfo = {
 			name: 'Jane Doe',
 			password: 'TestTest123',
@@ -209,19 +204,25 @@ describe.only('User Services', () => {
 		};
 
 		const newInfo = {
-			name: "Updated Jane Doe",
-			password: "TestUpdate123",
-			email: "updatejanedoe@email.com"
+			name: 'Updated Jane Doe',
+			password: 'TestUpdate123',
+			email: 'updatejanedoe@email.com',
 		};
 
-		newInfo.password = await userService.hashPassword(newInfo)
+		newInfo.password = await userService.hashPassword(newInfo);
 
-		const oldUser = await userService.findUser({ email: oldInfo.email }, { projection: "+password" });
-		const newUser = await userService.updateUser({ email: oldInfo.email }, { ...newInfo }, { projection: "+password" });
+		const oldUser = await userService.findUser(
+			{ email: oldInfo.email },
+			{ projection: '+password' }
+		);
+		const newUser = await userService.updateUser(
+			{ email: oldInfo.email },
+			{ ...newInfo },
+			{ projection: '+password' }
+		);
 
 		if (oldUser) {
-			expect(newUser).not.toMatchObject(oldUser)
+			expect(newUser).not.toMatchObject(oldUser);
 		}
-	})
-
+	});
 });

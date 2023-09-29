@@ -48,7 +48,7 @@ const postSchema = new Schema(
 	},
 	{ timestamps: true }
 );
-
+// TODO: Change naming for model
 type Post = InferSchemaType<typeof postSchema>;
 type PostModel = Model<Post>;
 

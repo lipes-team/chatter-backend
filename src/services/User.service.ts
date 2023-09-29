@@ -5,7 +5,7 @@ import {
 	FilterOptions,
 	UpdateOptions,
 	OptionsQuery,
-	update
+	update,
 } from '../database/abstraction';
 
 import bcrypt from 'bcrypt';
@@ -32,25 +32,24 @@ class UserService {
 	}
 	async createUser(newUser: UserData) {
 		let hashedPassword = await this.hashPassword(newUser);
+		//TODO: update to not change the original object
 		newUser.password = hashedPassword;
 		return addToDb(this.userModel, newUser);
 	}
 
 	async hashPassword(newUser: UserData): Promise<string> {
-
-		return bcrypt.hash(newUser.password, 10)
-
+		return bcrypt.hash(newUser.password, 10);
 	}
 
 	async compareHashedPassword(
 		plainPassword: string,
 		hashPassword: string
 	): Promise<boolean> {
-		return bcrypt.compare(plainPassword, hashPassword)
+		return bcrypt.compare(plainPassword, hashPassword);
 	}
 
 	async findUser(filter: Filter, options?: Options) {
-		return findOne(userModel, filter, options)
+		return findOne(userModel, filter, options);
 	}
 
 	createAuthToken(user: Remover<UserData, 'password'>) {
@@ -67,7 +66,11 @@ class UserService {
 	}
 
 	updateUser(filter: Filter, newUser: Update, options?: Options) {
-		return update(userModel, filter, newUser, { new: true, lean: true, ...options })
+		return update(userModel, filter, newUser, {
+			new: true,
+			lean: true,
+			...options,
+		});
 	}
 }
 

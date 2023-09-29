@@ -20,6 +20,7 @@ class CommentController {
 			next(error);
 		}
 	}
+
 	async findOne(
 		req: RouteOpts['payload'],
 		res: RouteOpts['res'],
@@ -34,6 +35,7 @@ class CommentController {
 			next(error);
 		}
 	}
+
 	async update(
 		req: RouteOpts['payload'],
 		res: RouteOpts['res'],
@@ -69,6 +71,7 @@ class CommentController {
 			next(error);
 		}
 	}
+
 	async delete(
 		req: RouteOpts['payload'],
 		res: RouteOpts['res'],
