@@ -13,7 +13,8 @@ import { logger } from '../src/utils/logger';
 import { initializeApp } from '../app';
 import { postService } from '../src/services/Post.service';
 import { userService } from '../src/services/User.service';
-import { NewComment } from '../src/models/Comment.model';
+import { NewComment, commentModel } from '../src/models/Comment.model';
+import { addToDb, deleteOne } from '../src/database/abstraction';
 
 describe('Comments Controller', () => {
 	let database: Connection | undefined;
@@ -22,10 +23,11 @@ describe('Comments Controller', () => {
 		text: `This content is really amazing!!`,
 	};
 	let postId: string;
-
+	let userId: string;
 	const baseRoute = '/comments';
 	let header = { authorization: '' };
 	let differentUserHeader = { authorization: '' };
+	let model = commentModel;
 	beforeAll(async () => {
 		try {
 			const { app: application, db } = await initializeApp();
@@ -48,7 +50,7 @@ describe('Comments Controller', () => {
 				userService.createUser({ ...newUser }),
 				userService.createUser({ ...differentUser }),
 			]);
-			let userId = firstUser._id;
+			userId = firstUser._id.toString();
 
 			const [firstUserToken, secondUserToken] = await Promise.all([
 				postRequest({ app, infoSend: newUser, route: '/user/login' }),
@@ -238,7 +240,316 @@ describe('Comments Controller', () => {
 			}
 		});
 
-		it(`should throw error without auth Token`, async () => {
+		it(`should throw error without authToken`, async () => {
+			const route = `${baseRoute}/${postId}`;
+			const expectedRes = {
+				errors: [
+					{
+						message: 'No authorization token was found',
+					},
+				],
+			};
+
+			if (app) {
+				const res = await postRequest({ app, route });
+				expectStatus(res, 401);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+	});
+
+	// ==================== READ COMMENT TESTS ====================
+	describe('Read comments', () => {
+		it(`should get comment by ID`, async () => {
+			const comment = await addToDb(model, {
+				...commentBody,
+				post: postId,
+				owner: userId,
+			});
+			const id = comment._id;
+			const route = `${baseRoute}/${id}`;
+
+			const expectedRes = {
+				text: comment.text,
+			};
+
+			if (app) {
+				const res = await getRequest({ app, route, header });
+				expectStatus(res, 200);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw an error getting comment by invalid ID`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id.toString();
+			const route = `${baseRoute}/${id.slice(0, -5)}`;
+			const expectedRes = {
+				errors: [
+					{
+						message: 'Invalid Id',
+						path: ['params', 'id', 'Find Comment'],
+					},
+				],
+				path: 'Validation',
+			};
+			if (app) {
+				const res = await getRequest({ app, route, header });
+				expectStatus(res, 400);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw error without authToken`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+			const route = `${baseRoute}/${id}`;
+			const expectedRes = {
+				errors: [
+					{
+						message: 'No authorization token was found',
+					},
+				],
+			};
+
+			if (app) {
+				const res = await getRequest({ app, route });
+				expectStatus(res, 401);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+	});
+
+	// ==================== UPDATE COMMENT TESTS ====================
+	describe('Update comments', () => {
+		it(`should update comment text`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+
+			const route = `${baseRoute}/${id}`;
+
+			const infoSend = {
+				text: `Updates the comment's text`,
+			};
+
+			const expectedRes = {
+				text: infoSend.text,
+			};
+
+			if (app) {
+				const res = await putRequest({ app, route, infoSend, header });
+				expectStatus(res, 200);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should update comment image`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+			const route = `${baseRoute}/${id}`;
+
+			const infoSend = {
+				image: `Updates the comment's image`,
+			};
+
+			const expectedRes = {
+				text: commentBody.text,
+				image: infoSend.image,
+			};
+
+			if (app) {
+				const res = await putRequest({ app, route, infoSend, header });
+				expectStatus(res, 200);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should update the comment text and the image`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+			const route = `${baseRoute}/${id}`;
+
+			const infoSend = {
+				text: `Updates the comment's text simultaneously`,
+				image: `Updates the comment's image simultaneously`,
+			};
+
+			const expectedRes = {
+				text: infoSend.text,
+				image: infoSend.image,
+			};
+
+			if (app) {
+				const res = await putRequest({ app, route, infoSend, header });
+				expectStatus(res, 200);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw an error when text is an empty string`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+			const route = `${baseRoute}/${id}`;
+
+			const infoSend = {
+				text: ``,
+			};
+
+			const expectedRes = {
+				errors: [
+					{
+						message: 'String must contain at least 1 character(s)',
+						path: ['body', 'text'],
+					},
+				],
+				path: 'Validation',
+			};
+
+			if (app) {
+				const res = await putRequest({ app, route, infoSend, header });
+				expectStatus(res, 400);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw an error when comment isn't found`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+
+			await deleteOne(model, { _id: id });
+
+			const infoSend = {
+				text: `Testing the error for comment not found`,
+			};
+
+			const route = `${baseRoute}/${id}`;
+
+			const expectedRes = {
+				errors: [
+					{
+						message: `Seems that this isn't a comment`,
+					},
+				],
+				path: 'Update comment',
+			};
+
+			if (app) {
+				const res = await putRequest({ app, route, header, infoSend });
+				expectStatus(res, 400);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw an error when trying to update someone's else comment`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+			const route = `${baseRoute}/${id}`;
+
+			const infoSend = {
+				text: `Updates the comment's text simultaneously`,
+				image: `Updates the comment's image simultaneously`,
+			};
+
+			const expectedRes = {
+				errors: [{ message: `You aren't allowed to edit this comment` }],
+				path: 'Update comment',
+			};
+
+			if (app) {
+				const res = await putRequest({
+					app,
+					route,
+					infoSend,
+					header: differentUserHeader,
+				});
+				expectStatus(res, 401);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw an error with invalid Id`, async () => {
+			const comment = await addToDb(model, {
+				...commentBody,
+				post: postId,
+				owner: userId,
+			});
+
+			const id = comment._id.toString();
+			const route = `${baseRoute}/${id.slice(0, -5)}`;
+
+			const infoSend = {
+				text: `Updates the comment's text simultaneously`,
+				image: `Updates the comment's image simultaneously`,
+			};
+
+			const expectedRes = {
+				errors: [
+					{ message: `Invalid Id`, path: ['params', 'id', 'Update Comment'] },
+				],
+				path: 'Validation',
+			};
+
+			if (app) {
+				const res = await putRequest({
+					app,
+					route,
+					infoSend,
+					header: differentUserHeader,
+				});
+				expectStatus(res, 400);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw error without authToken`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+			const route = `${baseRoute}/${id}`;
 			const expectRes = {
 				errors: [
 					{
@@ -248,84 +559,132 @@ describe('Comments Controller', () => {
 			};
 
 			if (app) {
-				const res = await postRequest({ app, route: baseRoute });
+				const res = await putRequest({ app, route });
 				expectStatus(res, 401);
 				expectResponseBody(res, expectRes);
 			}
 		});
 	});
 
-	// ==================== READ COMMENT TESTS ====================
-	// describe('Read comments', () => {
-	// 	it(`should get comment by ID`, async () => {});
-
-	// 	it(`should throw an error getting comment by invalid ID`, async () => {});
-	// it(`should throw error without auth Token`, async () => {
-
-	// 	const expectRes = {
-	// 		errors: [
-	// 			{
-	// 				message: 'No authorization token was found',
-	// 			},
-	// 		],
-	// 	};
-
-	// 	if (app) {
-	// 		const res = await postRequest({ app, route });
-	// 		expectStatus(res, 401);
-	// 		expectResponseBody(res, expectRes);
-	// 	}
-	// });
-	// });
-
-	// ==================== UPDATE COMMENT TESTS ====================
-	// describe('Update comments', () => {
-	// 	it(`should update comment text`, async () => {});
-
-	// 	it(`should update comment image`, async () => {});
-
-	// 	it(`should update the comment text and the image`, async () => {});
-	// it(`should throw error without auth Token`, async () => {
-
-	// 	const expectRes = {
-	// 		errors: [
-	// 			{
-	// 				message: 'No authorization token was found',
-	// 			},
-	// 		],
-	// 	};
-
-	// 	if (app) {
-	// 		const res = await postRequest({ app, route });
-	// 		expectStatus(res, 401);
-	// 		expectResponseBody(res, expectRes);
-	// 	}
-	// });
-	// });
-
 	// ==================== DELETE COMMENT TESTS ====================
-	// describe('Delete comments', () => {
-	// 	it(`should throw an error trying to delete someone's else comments`, async () => {});
+	describe('Delete comments', () => {
+		it(`should delete comment`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+			const route = `${baseRoute}/${id}`;
 
-	// 	it(`should throw an error when trying to delete comment by invalid ID`, async () => {});
+			if (app) {
+				const res = await deleteRequest({ app, route, header });
+				expectStatus(res, 204);
+			}
+		});
 
-	// it(`should throw error without auth Token`, async () => {
+		it(`should throw an error trying to delete a comment that doesn't exist`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
 
-	// 	const expectRes = {
-	// 		errors: [
-	// 			{
-	// 				message: 'No authorization token was found',
-	// 			},
-	// 		],
-	// 	};
+			await deleteOne(model, { _id: id });
 
-	// 	if (app) {
-	// 		const res = await postRequest({ app, route });
-	// 		expectStatus(res, 401);
-	// 		expectResponseBody(res, expectRes);
-	// 	}
-	// });
+			const route = `${baseRoute}/${id}`;
 
-	// 	it(`should delete comment`, async () => {});
-	// });
+			const expectedRes = {
+				errors: [{ message: 'Comment not found' }],
+				path: 'Delete comment',
+			};
+
+			if (app) {
+				const res = await deleteRequest({ app, route, header });
+				expectStatus(res, 400);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw an error trying to delete someone's else comments`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+			const route = `${baseRoute}/${id}`;
+
+			const expectedRes = {
+				errors: [{ message: `You aren't allowed to delete this comment` }],
+				path: 'Delete comment',
+			};
+
+			if (app) {
+				const res = await deleteRequest({
+					app,
+					route,
+					header: differentUserHeader,
+				});
+				expectStatus(res, 401);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw an error when trying to delete comment by invalid ID`, async () => {
+			const comment = await addToDb(model, {
+				...commentBody,
+				post: postId,
+				owner: userId,
+			});
+
+			const id = comment._id.toString();
+			const route = `${baseRoute}/${id.slice(0, -5)}`;
+
+			const expectedRes = {
+				errors: [
+					{ message: `Invalid Id`, path: ['params', 'id', 'Delete Comment'] },
+				],
+				path: 'Validation',
+			};
+
+			if (app) {
+				const res = await deleteRequest({
+					app,
+					route,
+					header,
+				});
+				expectStatus(res, 400);
+				expectResponseBody(res, expectedRes);
+			}
+		});
+
+		it(`should throw error without authToken`, async () => {
+			const id = (
+				await addToDb(model, {
+					...commentBody,
+					post: postId,
+					owner: userId,
+				})
+			)._id;
+			const route = `${baseRoute}/${id}`;
+			const expectRes = {
+				errors: [
+					{
+						message: 'No authorization token was found',
+					},
+				],
+			};
+
+			if (app) {
+				const res = await deleteRequest({ app, route });
+				expectStatus(res, 401);
+				expectResponseBody(res, expectRes);
+			}
+		});
+	});
 });
