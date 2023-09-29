@@ -63,9 +63,10 @@ export const update = <TModel>(
 
 export const deleteOne = <TModel>(
 	model: Model<TModel>,
-	filter: FilterOptions<TModel>
+	filter: FilterOptions<TModel>,
+	options?: OptionsQuery<TModel>
 ) => {
-	return model.findOneAndDelete(filter);
+	return model.findOneAndDelete(filter, options);
 };
 
 export const deleteMany = <TModel>(
