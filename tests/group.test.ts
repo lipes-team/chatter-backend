@@ -10,10 +10,11 @@ import { postRequest } from './utils/requestAbstraction';
 import { expectStatus } from './utils/expectAbstractions';
 
 
-describe.only('User Services', () => {
+describe('User Services', () => {
     let database: Connection | undefined;
     let app: Express | undefined;
     let authToken = "";
+    let header = { Authorization: "" };
 
     beforeAll(async () => {
         try {
@@ -35,11 +36,17 @@ describe.only('User Services', () => {
                 email: userInfo.email
             })
 
+            header = {
+                Authorization: `Bearer ${authToken}`
+            }
+
         } catch (error) {
             logger.error(error);
             // TODO: should throw an error here too?
         }
     });
+
+
 
     afterAll(async () => {
         try {
@@ -50,27 +57,32 @@ describe.only('User Services', () => {
         }
     });
 
-    it("CONTROLLER (create): Should create a new group", async () => {
-        const infoSend = {
-            name: "Test Group",
-            description: "Group for testing purposes",
-            users: [
-                {
-                    userRef: "TEST",
-                    role: "Manager"
-                }
-            ],
-            chatRoom: "test-chatroom",
-            posts: []
-        }
+    describe("CONTROLLERS", () => {
+        it("Should create a new group", async () => {
+            const infoSend = {
+                name: "Test Group",
+                description: "Group for testing purposes",
+                users: [
+                    {
+                        userRef: "TEST",
+                        role: "Manager"
+                    }
+                ],
+                chatRoom: "test-chatroom",
+                posts: []
+            }
 
-        const route = "/group/create"
-        if (app) {
-            const res = await postRequest({ app, infoSend, route });
-            expectStatus(res, 201);
-        }
+            const route = "/group/create";
+
+            if (app) {
+                const res = await postRequest({ app, infoSend, route, header });
+                expectStatus(res, 201);
+            }
+
+        })
 
     })
+
 
 
 
