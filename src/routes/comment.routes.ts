@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import { commentController } from '../controllers/Comment.controller';
 import { validateSchema } from '../middlewares/validateSchema';
-import { createCommentSchema } from '../validation/comment.schema';
+import {
+	createCommentSchema,
+	updateCommentSchema,
+} from '../validation/comment.schema';
 import { testIdSchema } from '../validation/id.schema';
 
 const router = Router();
@@ -13,8 +16,21 @@ router.post(
 	validateSchema(createCommentSchema),
 	commentController.create
 );
-router.get('/:id', commentController.findOne);
-router.put('/:id', commentController.update);
-router.delete('/:id', commentController.delete);
+router.get(
+	'/:id',
+	validateSchema(testIdSchema('Find Comment')),
+	commentController.findOne
+);
+router.put(
+	'/:id',
+	validateSchema(testIdSchema('Update Comment')),
+	validateSchema(updateCommentSchema),
+	commentController.update
+);
+router.delete(
+	'/:id',
+	validateSchema(testIdSchema('Delete Comment')),
+	commentController.delete
+);
 
 export { router as commentRoutes };
