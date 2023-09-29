@@ -3,6 +3,9 @@ import {
 	OptionsQuery,
 	UpdateOptions,
 	addToDb,
+	deleteOne,
+	findOne,
+	update,
 } from '../database/abstraction';
 import {
 	Comment,
@@ -23,6 +26,22 @@ class CommentService {
 
 	async createComment(newComment: NewComment) {
 		return addToDb(this.commentModel, newComment);
+	}
+
+	async findOneComment(filter: Filter, options?: Options) {
+		return findOne(this.commentModel, filter, options);
+	}
+
+	async updateOneComment(
+		filter: Filter,
+		updateData: Update,
+		options?: Options
+	) {
+		return update(this.commentModel, filter, updateData, options);
+	}
+
+	async deleteOneComment(filter: Filter, options?: Options) {
+		return deleteOne(this.commentModel, filter, options);
 	}
 }
 
