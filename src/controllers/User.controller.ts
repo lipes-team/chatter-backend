@@ -27,8 +27,11 @@ class UserController {
 		next: RouteOpts['next']
 	) {
 		try {
-			const { password, email } = req.body;
-			const user = await userService.findUser(email);
+			const { name, password, email } = req.body;
+			const user = await userService.findUser(
+				{ email },
+				{ projection: '+password' }
+			);
 
 			if (user === null) {
 				throw {
@@ -52,6 +55,30 @@ class UserController {
 			const authToken = userService.createAuthToken(user);
 
 			return res.status(200).json({ authToken: authToken });
+		} catch (error: any) {
+			error.path = 'Login user';
+			next(error);
+		}
+	}
+
+	async update(
+		req: RouteOpts['payload'],
+		res: RouteOpts['res'],
+		next: RouteOpts['next']
+	) {
+		try {
+			const { id, name, email } = req.payload!;
+
+			const newUser = {
+				name: req.body.name,
+				password: req.body.password,
+				email: req.body.email,
+			};
+
+			console.log(newUser);
+			const updatedUser = await userService.updateUser({ id }, newUser);
+
+			return res.status(200).json(updatedUser);
 		} catch (error: any) {
 			error.path = 'Login user';
 			next(error);

@@ -12,13 +12,15 @@ import {
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
 import { logger } from '../src/utils/logger';
 import { initializeApp } from '../app';
-import { findOne, find, addToDb } from '../src/database/abstraction';
+import { findOne, find, addToDb, update } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
 import { userService } from '../src/services/User.service';
 
 describe.only('User Services', () => {
 	let database: Connection | undefined;
 	let app: Express | undefined;
+	let authToken = "";
+
 	beforeAll(async () => {
 		try {
 			const { app: application, db } = await initializeApp();
@@ -32,7 +34,13 @@ describe.only('User Services', () => {
 				email: 'uniquejane@email.com',
 			};
 
-			let user = await userService.createUser(userInfo);
+			await userService.createUser(userInfo);
+
+			authToken = userService.createAuthToken({
+				name: userInfo.name,
+				email: userInfo.email
+			})
+
 		} catch (error) {
 			logger.error(error);
 			// TODO: should throw an error here too?
@@ -92,12 +100,44 @@ describe.only('User Services', () => {
 			email: 'uniquejane@email.com',
 		};
 		const route = '/user/signup';
-		await find(userModel, { email: infoSend.email });
+
 		if (app) {
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 400);
 		}
 	});
+	it('CONTROLER (login): Should respond 200 if user logins with valid info', async () => {
+		const infoSend = {
+			name: 'Jane Doe',
+			password: 'TestTest123', //valid password
+			email: 'uniquejane@email.com',
+		};
+		const route = '/user/login';
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 200);
+		}
+	});
+
+	it("CONTROLLER (Update): Should respond with 200", async () => {
+		const infoSend = {
+			name: "Updated Jane Doe",
+			password: "TestUpdate123",
+			email: "updatejanedoe@email.com"
+		};
+
+		const route = '/user/update';
+		const header = {
+			Authorization: `Bearer ${authToken}`
+		}
+		console.log(header)
+
+		if (app) {
+			const res = await postRequest({ app, infoSend, route, header });
+			expectStatus(res, 200);
+		}
+	})
 
 	it('SERVICE: Password in db should be hashed and match original password', async () => {
 		const userInfo = {
@@ -134,7 +174,7 @@ describe.only('User Services', () => {
 			email: 'janedoe@email.com',
 		};
 		const userInDB = await userService.findUser(
-			userInfo.email
+			{ email: userInfo.email }
 		);
 
 		expect(userInDB).not.toBeNull();
@@ -150,7 +190,7 @@ describe.only('User Services', () => {
 		};
 
 		let userInDB = await userService.findUser(
-			userInfo.email,
+			{ email: userInfo.email },
 		);
 
 		if (userInDB) {
@@ -160,17 +200,28 @@ describe.only('User Services', () => {
 		expect(authToken).toBeDefined();
 	});
 
-	it('CONTROLER (login): Should respond 200 if user logins with valid info', async () => {
-		const infoSend = {
+
+	it("SERVICE (Update): Should update user info in db", async () => {
+		const oldInfo = {
 			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
+			password: 'TestTest123',
 			email: 'uniquejane@email.com',
 		};
-		const route = '/user/login';
 
-		if (app) {
-			const res = await postRequest({ app, infoSend, route });
-			expectStatus(res, 200);
+		const newInfo = {
+			name: "Updated Jane Doe",
+			password: "TestUpdate123",
+			email: "updatejanedoe@email.com"
+		};
+
+		newInfo.password = await userService.hashPassword(newInfo)
+
+		const oldUser = await userService.findUser({ email: oldInfo.email }, { projection: "+password" });
+		const newUser = await userService.updateUser({ email: oldInfo.email }, { ...newInfo }, { projection: "+password" });
+
+		if (oldUser) {
+			expect(newUser).not.toMatchObject(oldUser)
 		}
-	});
+	})
+
 });
