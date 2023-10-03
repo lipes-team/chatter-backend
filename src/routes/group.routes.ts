@@ -13,4 +13,6 @@ router.post(
     groupController.create
 );
 
+router.get("/:id", isAuthenticated, groupController.getById)
+
 export { router as groupRoutes };
