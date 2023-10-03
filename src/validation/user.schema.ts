@@ -12,3 +12,13 @@ export const createUserSchema = z.object({
 		email: z.string().email(),
 	}),
 });
+
+export const loginUserSchema = z.object({
+	body: z.object({
+		password: z.string().regex(passwordRegex, {
+			message:
+				'Invalid password, must contain at least one uppercase letter, one lowercase letter, one number, and is at least 8 characters long',
+		}),
+		email: z.string().email(),
+	})
+})

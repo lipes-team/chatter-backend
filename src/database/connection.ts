@@ -8,7 +8,7 @@ export const connectDB = async () => {
 	try {
 		// TODO: check if we can/should change the timeout
 		const { connection } = await connect(MONGODB, {
-			autoIndex: isDev, //if we dont do this we'll need to create the indexes manually
+			autoIndex: true,
 			socketTimeoutMS: 0,
 		});
 

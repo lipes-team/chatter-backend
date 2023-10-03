@@ -8,14 +8,12 @@ export const validateSchema =
 		res: RouteOpts['res'],
 		next: RouteOpts['next']
 	) => {
-		// TODO: Add payload to destructuring
 		const { body, params, query } = req;
 		try {
 			schema.parse({
 				body,
 				params,
 				query,
-				// payload
 			});
 			next();
 		} catch (error: any) {

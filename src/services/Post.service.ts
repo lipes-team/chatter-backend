@@ -1,7 +1,6 @@
-import { NewPost, Post, PostModel, postModel } from '../models/Post.model';
+import { NewPost, PostInferred, PostModel, Post } from '../models/Post.model';
 import {
 	addToDb,
-	find,
 	findOne,
 	deleteOne,
 	update,
@@ -10,23 +9,18 @@ import {
 	OptionsQuery,
 } from '../database/abstraction';
 
-type Filter = FilterOptions<Post>;
-type Update = UpdateOptions<Post>;
-type Options = OptionsQuery<Post>;
+type Filter = FilterOptions<PostInferred>;
+type Update = UpdateOptions<PostInferred>;
+type Options = OptionsQuery<PostInferred>;
 
 class PostService {
 	postModel: PostModel;
 	constructor() {
-		this.postModel = postModel;
+		this.postModel = Post;
 	}
 
 	async createPost(newPost: NewPost) {
 		return addToDb(this.postModel, newPost);
-	}
-
-	// TODO: Should find all the posts the user subscribes?
-	async findAllPosts(filter: Filter, options?: Options) {
-		return find(this.postModel, filter, options);
 	}
 
 	async findOnePost(filter: Filter, options?: Options) {

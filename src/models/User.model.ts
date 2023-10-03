@@ -41,8 +41,9 @@ const userSchema = new Schema(
 	{ timestamps: true }
 );
 
-type User = InferSchemaType<typeof userSchema>;
-type UserModel = Model<User>;
-const userModel = model<User>('User', userSchema);
+type UserInferred = InferSchemaType<typeof userSchema>;
+type UserModel = Model<UserInferred>;
 
-export { userModel, User, UserModel };
+const User = model<UserInferred>('User', userSchema);
+
+export { User, UserInferred, UserModel };
