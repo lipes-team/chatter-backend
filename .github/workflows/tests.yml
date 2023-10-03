@@ -4,8 +4,9 @@ on:
     branches:
       - main
       - development
-environment:
-  name: actions_test
+env:
+  PORT: ${{ secrets.PORT }}
+  EXPIRED: ${{ secrets.EXPIRED }}
 jobs:
   build:
     runs-on: ubuntu-latest
