@@ -6,10 +6,10 @@ export type RouteOpts = {
 	req: Request;
 	res: Response;
 	next: NextFunction;
-	payload: Request & { payload?: payload };
+	payload: Request & { payload?: Payload };
 };
 
-interface payload extends JwtPayload {
+interface Payload extends JwtPayload {
 	name: string;
 	email: string;
 	id: string;

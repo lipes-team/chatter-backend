@@ -24,11 +24,6 @@ class PostService {
 		return addToDb(this.postModel, newPost);
 	}
 
-	// TODO: Should find all the posts the user subscribes?
-	async findAllPosts(filter: Filter, options?: Options) {
-		return find(this.postModel, filter, options);
-	}
-
 	async findOnePost(filter: Filter, options?: Options) {
 		return findOne(this.postModel, filter, options);
 	}

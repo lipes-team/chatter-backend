@@ -40,9 +40,10 @@ const userSchema = new Schema(
 	},
 	{ timestamps: true }
 );
-
+// TODO: Change naming for model
 type User = InferSchemaType<typeof userSchema>;
 type UserModel = Model<User>;
+
 const userModel = model<User>('User', userSchema);
 
 export { userModel, User, UserModel };

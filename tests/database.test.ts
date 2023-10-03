@@ -10,9 +10,8 @@ import {
 } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
 import { connectDB, disconnectDB } from '../src/database/connection';
-import { logger } from '../src/utils/logger';
 
-describe('Mongoose Abstraction', () => {
+describe('Database Abstraction', () => {
 	let database: Connection | undefined;
 
 	const Model = userModel;
@@ -35,40 +34,49 @@ describe('Mongoose Abstraction', () => {
 		await disconnectDB();
 	});
 
-	it('create abstraction', async () => {
+	it('should create an entry on the database', async () => {
 		try {
 			const testUser = await addToDb(Model, userTestData);
 
 			// Check if the test user matches the expected data without timestamps
-			expect(testUser).toMatchObject(userTestData);
+			expect(testUser).toEqual(expect.objectContaining(userTestData));
 		} catch (error) {
-			logger.error(error);
+			throw error;
 		}
 	});
 
-	it('find abstraction', async () => {
+	it('should find an entry on the database', async () => {
 		try {
-			const testUser = await find(Model, { name: userTestData.name }).select(
+			const testUsers = await find(Model, { name: userTestData.name }).select(
 				'+password'
 			);
-			expect(testUser[0]).toMatchObject(userTestData);
+			expect(testUsers[0]).toEqual(expect.objectContaining(userTestData));
 		} catch (error) {
-			logger.error(error);
+			throw error;
 		}
 	});
-	// TODO: Add test to find without filter
-	it('find one abstraction', async () => {
+
+	it('should find entries on the database', async () => {
+		try {
+			const testUsers = await find(Model);
+			expect(testUsers.length).toBeGreaterThan(0);
+		} catch (error) {
+			throw error;
+		}
+	});
+
+	it('should findOne an entry on the database', async () => {
 		try {
 			const testUser = await findOne(Model, { name: userTestData.name }).select(
 				'+password'
 			);
-			expect(testUser).toMatchObject(userTestData);
+			expect(testUser).toEqual(expect.objectContaining(userTestData));
 		} catch (error) {
-			logger.error(error);
+			throw error;
 		}
 	});
 
-	it('update abstraction', async () => {
+	it('should update an entry on the database', async () => {
 		try {
 			const testUser = await update(
 				Model,
@@ -78,23 +86,23 @@ describe('Mongoose Abstraction', () => {
 			).select('+password');
 			const userUpdated = { ...userTestData };
 			userUpdated.name = name;
-			expect(testUser).toMatchObject(userUpdated);
+			expect(testUser).toEqual(expect.objectContaining(userUpdated));
 		} catch (error) {
-			logger.error(error);
+			throw error;
 		}
 	});
 
-	it('delete abstraction', async () => {
+	it('should delete an entry from the database', async () => {
 		try {
-			const res = await deleteOne(Model, { name });
-
-			expect(res).toMatchObject({ acknowledged: true, deletedCount: 1 });
+			const res = await deleteOne(Model, { name }).select('+password');
+			const expectedUser = { ...userTestData, name };
+			expect(res).toEqual(expect.objectContaining(expectedUser));
 		} catch (error) {
-			logger.error(error);
+			throw error;
 		}
 	});
 
-	it('delete many abstraction', async () => {
+	it('should delete entries from the database', async () => {
 		const users = [
 			{
 				name: 'John Doe',
@@ -113,7 +121,7 @@ describe('Mongoose Abstraction', () => {
 			const res = await deleteMany(Model, { name: userTestData.name });
 			expect(res).toMatchObject({ acknowledged: true, deletedCount: 2 });
 		} catch (error) {
-			logger.error(error);
+			throw error;
 		}
 	});
 });
