@@ -10,11 +10,13 @@ class PostController {
 		try {
 			const { activePost, title } = req.body;
 			const owner = req.payload?.id!;
-			//TODO: change to empty arrays where needed
+
 			const newPost = await postService.createPost({
 				title,
 				activePost,
 				owner,
+				history: [],
+				comments: [],
 			});
 			return res.status(201).json(newPost);
 		} catch (error: any) {

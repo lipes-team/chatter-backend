@@ -24,6 +24,7 @@ const postSchema = new Schema(
 			type: String,
 			enum: ['active', 'pending', 'inReview'],
 			default: 'pending',
+			required: false,
 		},
 		editPropose: {
 			text: {
@@ -34,6 +35,7 @@ const postSchema = new Schema(
 		toUpdate: {
 			type: Boolean,
 			default: false,
+			required: false,
 		},
 		history: [
 			{
@@ -49,18 +51,16 @@ const postSchema = new Schema(
 	{ timestamps: true }
 );
 // TODO: Change naming for model
-type Post = InferSchemaType<typeof postSchema>;
-type PostModel = Model<Post>;
+type PostInferred = InferSchemaType<typeof postSchema>;
+type PostModel = Model<PostInferred>;
 
-type OptionalPost = OptionalArrays<
-	Post,
-	'comments' | 'history' | 'status' | 'toUpdate' | 'editPropose'
->;
-
-type NewPost = Remover<OptionalPost, keyof Timestamps | 'owner'> & {
+type NewPost = Remover<
+	PostInferred,
+	keyof Timestamps | 'owner' | 'toUpdate' | 'status'
+> & {
 	owner: string | Types.ObjectId;
 };
 
-const postModel = model('Post', postSchema);
+const Post = model('Post', postSchema);
 
-export { postModel, Post, PostModel, NewPost };
+export { Post, PostInferred, PostModel, NewPost };

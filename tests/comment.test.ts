@@ -69,7 +69,12 @@ describe('Comments Controller', () => {
 			};
 			//TODO: Check if should change to model instead of service
 			postId = (
-				await postService.createPost({ ...newPost, owner: userId })
+				await postService.createPost({
+					...newPost,
+					owner: userId,
+					comments: [],
+					history: [],
+				})
 			)._id.toString();
 		} catch (error) {
 			throw error;

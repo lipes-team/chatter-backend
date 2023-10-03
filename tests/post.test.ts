@@ -312,6 +312,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const postRoute = `${route}/${newPost._id}`;
@@ -342,6 +344,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const expectRes = {
@@ -378,6 +382,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const infoSend = { title: 'Updated title' };
@@ -397,6 +403,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const postRoute = `${route}/${newPost._id}`;
@@ -423,6 +431,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const postRoute = `${route}/${newPost._id}`;
@@ -461,6 +471,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const postRoute = `${route}/${newPost._id}`;
@@ -493,6 +505,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const postRoute = `${route}/${newPost._id}`;
@@ -523,6 +537,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const postRoute = `${route}/${newPost._id}`;
@@ -554,6 +570,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const postRoute = `${route}/${newPost._id.toString().slice(0, -3)}`;
@@ -586,6 +604,8 @@ describe('Posts Controller', () => {
 			const newPost = await postService.createPost({
 				...postToCreate,
 				owner: userId,
+				history: [],
+				comments: [],
 			});
 
 			const postRoute = `${route}/${newPost._id}`;
