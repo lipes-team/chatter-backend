@@ -4,6 +4,7 @@ import { errorHandling } from './routes/errorHandling.routes';
 import { RouteOpts } from './utils/types';
 import { postRoutes } from './routes/post.routes';
 import { userRoutes } from './routes/user.routes';
+import { groupRoutes } from './routes/group.routes';
 import { commentRoutes } from './routes/comment.routes';
 import { isAuthenticated } from './middlewares/isAuthenticated';
 
