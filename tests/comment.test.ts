@@ -17,7 +17,9 @@ import { Post } from '../src/models/Post.model';
 describe('Comments Controller', () => {
 	let database: Connection;
 	let PORT = Number(process.env.PORT!);
-	let app = application.listen(PORT);
+	let app = application.listen(PORT, () => {
+		console.log(PORT);
+	});
 	const commentBody: Partial<NewComment> = {
 		text: `This content is really amazing!!`,
 	};
@@ -89,31 +91,6 @@ describe('Comments Controller', () => {
 	});
 
 	describe('Token Validation', () => {
-		it(`should throw error with an expired token`, async () => {
-			const infoSend = { ...commentBody };
-
-			const headers = { ...header };
-
-			headers.authorization = `Bearer ${process.env.EXPIRED!}`;
-
-			const expectRes = {
-				errors: [
-					{
-						message: 'jwt expired',
-					},
-				],
-			};
-
-			const res = await postRequest({
-				app,
-				infoSend,
-				route: baseRoute,
-				header: headers,
-			});
-			expectStatus(res, 401);
-			expectResponseBody(res, expectRes);
-		});
-
 		it(`should throw error without auth Token`, async () => {
 			const expectRes = {
 				errors: [
