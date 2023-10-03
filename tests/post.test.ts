@@ -146,7 +146,7 @@ describe('Posts Controller', () => {
 
 			const headers = { ...header };
 
-			headers.authorization = `Bearer ${process.env.EXPIRED!.slice(0, -3)}`;
+			headers.authorization = headers.authorization.slice(0, -5);
 
 			const expectRes = {
 				errors: [
