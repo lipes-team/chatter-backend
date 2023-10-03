@@ -14,7 +14,7 @@ import { userService } from '../src/services/User.service';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('User tests', () => {
-	let PORT = process.env.PORT!;
+	let PORT = Number(process.env.PORT!);
 	let database: Connection;
 	let app = application.listen(PORT);
 	let authToken = '';
