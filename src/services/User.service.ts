@@ -39,14 +39,11 @@ class UserService {
 		return addToDb(this.userModel, userToCreate);
 	}
 
-	async hashPassword(newUser: UserData): Promise<string> {
-		return bcrypt.hash(newUser.password, 10);
+	async hashPassword(newUser: UserData) {
+		return bcrypt.hash(newUser.password, 12);
 	}
 
-	async compareHashedPassword(
-		plainPassword: string,
-		hashPassword: string
-	): Promise<boolean> {
+	async compareHashedPassword(plainPassword: string, hashPassword: string) {
 		return bcrypt.compare(plainPassword, hashPassword);
 	}
 
