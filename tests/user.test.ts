@@ -16,8 +16,9 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 
 // TODO: refactor to organize the tests inside different describes
 describe('User tests', () => {
+	let PORT = process.env.PORT!;
 	let database: Connection;
-	let app = application.listen(3000);
+	let app = application.listen(PORT);
 	let authToken = '';
 	let mongod: MongoMemoryServer;
 	beforeAll(async () => {

@@ -12,8 +12,9 @@ import { postService } from '../src/services/Post.service';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('Posts Controller', () => {
+	let PORT = process.env.PORT!;
 	let database: Connection;
-	let app = application.listen(3000);
+	let app = application.listen(PORT);
 	let mongod: MongoMemoryServer;
 	const postBody = {
 		activePost: {

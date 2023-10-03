@@ -16,7 +16,8 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('Comments Controller', () => {
 	let database: Connection;
-	let app = application.listen(3000);
+	let PORT = process.env.PORT!;
+	let app = application.listen(PORT);
 	const commentBody: Partial<NewComment> = {
 		text: `This content is really amazing!!`,
 	};
