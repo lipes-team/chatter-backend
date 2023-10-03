@@ -1,4 +1,4 @@
-import { Connection } from 'mongoose';
+import { Connection, connect } from 'mongoose';
 
 import {
 	addToDb,
@@ -9,10 +9,11 @@ import {
 	deleteMany,
 } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
-import { connectDB, disconnectDB } from '../src/database/connection';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('Database Abstraction', () => {
-	let database: Connection | undefined;
+	let database: Connection;
+	let mongod: MongoMemoryServer;
 
 	const Model = userModel;
 	const userTestData = {
@@ -22,16 +23,17 @@ describe('Database Abstraction', () => {
 	};
 	const name = 'Alice Bob';
 	beforeAll(async () => {
-		database = await connectDB();
+		mongod = await MongoMemoryServer.create();
+		const uri = mongod.getUri();
+		database = (await connect(uri)).connection;
 		expect(database).toBeDefined();
 		await Model.ensureIndexes();
 	});
 
 	afterAll(async () => {
-		if (database) {
-			await database.dropDatabase();
-		}
-		await disconnectDB();
+		await database.dropDatabase();
+		await database.close();
+		await mongod.stop();
 	});
 
 	it('should create an entry on the database', async () => {
