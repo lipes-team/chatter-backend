@@ -2,6 +2,7 @@ import { RouteOpts } from "../utils/types";
 import { groupService } from './../services/Group.service';
 import { Group } from "../models/Group.model";
 import { Types } from "mongoose";
+import { findOne } from "../database/abstraction";
 
 
 class GroupController {
@@ -34,6 +35,38 @@ class GroupController {
 
         } catch (error: any) {
             error.path = "Create new group";
+            error.status = 400;
+        }
+    }
+
+    async getById(
+        req: RouteOpts["payload"],
+        res: RouteOpts["res"],
+        next: RouteOpts["next"]
+    ) {
+        try {
+            let groupId = req.params.groupId
+            const groupInfo = await groupService.getById(groupId)
+
+            return res.status(201).json(groupInfo);
+
+        } catch (error: any) {
+            error.path = "Get group by Id";
+            error.status = 400;
+        }
+    }
+
+    async getAllUserGroups(
+        req: RouteOpts["payload"],
+        res: RouteOpts["res"],
+        next: RouteOpts["next"]
+    ) {
+        try {
+            const { id } = req.payload!
+
+
+        } catch (error: any) {
+            error.path = "Get all groups of logged in user";
             error.status = 400;
         }
     }
