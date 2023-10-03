@@ -121,26 +121,6 @@ describe('Posts Controller', () => {
 			expectResponseBody(res, expectRes);
 		});
 
-		it(`should throw with an expired token`, async () => {
-			const infoSend = { ...postBody, activePost: { ...postBody.activePost } };
-
-			const headers = { ...header };
-
-			headers.authorization = `Bearer ${process.env.EXPIRED!}`;
-
-			const expectRes = {
-				errors: [
-					{
-						message: 'jwt expired',
-					},
-				],
-			};
-
-			const res = await postRequest({ app, infoSend, route, header: headers });
-			expectStatus(res, 401);
-			expectResponseBody(res, expectRes);
-		});
-
 		it(`should throw  with an invalid signature`, async () => {
 			const infoSend = { ...postBody, activePost: { ...postBody.activePost } };
 

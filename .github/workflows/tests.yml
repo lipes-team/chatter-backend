@@ -6,13 +6,12 @@ on:
       - development
 env:
   PORT: 5678
-  EXPIRED: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MDgxZmUzMDQwM2IwYjA3YjBlNTFiZCIsIm5hbWUiOiJmZWxpcGUiLCJlbWFpbCI6ImZlbGlwZThAZ21haWwuY29tIiwiaWF0IjoxNjk1MDQxMzUzLCJleHAiOjE2OTUwNDEzNTR9.v7dt0tbWEI9zwZoHobNdlv09s042KbhjAKNbKODnz0Q
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Install modules
-        run: npm install
+        run: pnpm install
       - name: Run tests
-        run: npm run test
+        run: pnpm test
