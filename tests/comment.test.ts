@@ -17,9 +17,7 @@ import { Post } from '../src/models/Post.model';
 describe('Comments Controller', () => {
 	let database: Connection;
 	let PORT = Number(process.env.PORT!);
-	let app = application.listen(PORT, () => {
-		console.log(PORT);
-	});
+	let app = application.listen(PORT);
 	const commentBody: Partial<NewComment> = {
 		text: `This content is really amazing!!`,
 	};
