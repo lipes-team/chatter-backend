@@ -10,7 +10,7 @@ import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
 import { app as application } from '../app';
 import { postService } from '../src/services/Post.service';
 import { userService } from '../src/services/User.service';
-import { NewComment, commentModel } from '../src/models/Comment.model';
+import { NewComment, Comment } from '../src/models/Comment.model';
 import { addToDb, deleteOne } from '../src/database/abstraction';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
@@ -27,7 +27,7 @@ describe('Comments Controller', () => {
 	let header = { authorization: '' };
 	let differentUserHeader = { authorization: '' };
 	let mongod: MongoMemoryServer;
-	let model = commentModel;
+	let model = Comment;
 	beforeAll(async () => {
 		try {
 			mongod = await MongoMemoryServer.create();

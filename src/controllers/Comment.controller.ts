@@ -11,7 +11,7 @@ class CommentController {
 		try {
 			const { text } = req.body;
 			const owner = req.payload?.id!;
-			const postId = req.params.id;
+			const postId = req.params.id!;
 			const commentToCreate: NewComment = { text, owner, post: postId };
 			const newComment = await commentService.createComment(commentToCreate);
 			res.status(201).json(newComment);

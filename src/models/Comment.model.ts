@@ -1,4 +1,5 @@
 import { InferSchemaType, Model, Schema, Types, model } from 'mongoose';
+import { Remover, Timestamps } from '../utils/types';
 
 const commentSchema = new Schema(
 	{
@@ -6,7 +7,10 @@ const commentSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		image: String,
+		image: {
+			type: String,
+			required: false,
+		},
 		owner: {
 			type: Schema.Types.ObjectId,
 			required: true,
@@ -26,9 +30,10 @@ interface NewComment {
 	owner: Types.ObjectId | string;
 	post: Types.ObjectId | string;
 }
-// TODO: Change naming for models
-type Comment = InferSchemaType<typeof commentSchema>;
-type CommentModel = Model<Comment>;
-const commentModel = model<Comment>('Comment', commentSchema);
 
-export { commentModel, Comment, NewComment, CommentModel };
+type CommentInferred = InferSchemaType<typeof commentSchema>;
+type CommentModel = Model<CommentInferred>;
+
+const Comment = model<CommentInferred>('Comment', commentSchema);
+
+export { Comment, CommentInferred, NewComment, CommentModel };

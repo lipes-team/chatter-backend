@@ -8,20 +8,20 @@ import {
 	update,
 } from '../database/abstraction';
 import {
-	Comment,
+	CommentInferred,
 	CommentModel,
 	NewComment,
-	commentModel,
+	Comment,
 } from '../models/Comment.model';
 
-type Filter = FilterOptions<Comment>;
-type Update = UpdateOptions<Comment>;
-type Options = OptionsQuery<Comment>;
+type Filter = FilterOptions<CommentInferred>;
+type Update = UpdateOptions<CommentInferred>;
+type Options = OptionsQuery<CommentInferred>;
 
 class CommentService {
 	commentModel: CommentModel;
 	constructor() {
-		this.commentModel = commentModel;
+		this.commentModel = Comment;
 	}
 
 	async createComment(newComment: NewComment) {
