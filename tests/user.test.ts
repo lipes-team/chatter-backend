@@ -1,5 +1,5 @@
 import { Connection, connect } from 'mongoose';
-
+import { Express } from 'express';
 import {
 	getRequest,
 	postRequest,
@@ -14,9 +14,8 @@ import { userService } from '../src/services/User.service';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('User tests', () => {
-	let PORT = Number(process.env.PORT!);
 	let database: Connection;
-	let app = application.listen(PORT);
+	let app: Express = application;
 	let authToken = '';
 	let mongod: MongoMemoryServer;
 	beforeAll(async () => {
@@ -47,7 +46,6 @@ describe('User tests', () => {
 		await database.dropDatabase();
 		await database.close();
 		await mongod.stop();
-		app.close();
 	});
 
 	describe('User controllers', () => {
