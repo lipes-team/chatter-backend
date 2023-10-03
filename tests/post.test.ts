@@ -30,6 +30,7 @@ describe('Posts Controller', () => {
 	let header = { authorization: '' };
 	let differentUserHeader = { authorization: '' };
 	beforeAll(async () => {
+		console.log(process.env.EXPIRED);
 		try {
 			mongod = await MongoMemoryServer.create();
 			const uri = mongod.getUri();
