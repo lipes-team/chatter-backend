@@ -1,7 +1,5 @@
-import { Connection } from 'mongoose';
-import { Express } from 'express';
+import { Connection, connect } from 'mongoose';
 
-import { disconnectDB } from '../src/database/connection';
 import {
 	postRequest,
 	putRequest,
@@ -9,16 +7,16 @@ import {
 	getRequest,
 } from './utils/requestAbstraction';
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
-import { logger } from '../src/utils/logger';
-import { initializeApp } from '../app';
+import { app as application } from '../app';
 import { postService } from '../src/services/Post.service';
 import { userService } from '../src/services/User.service';
 import { NewComment, commentModel } from '../src/models/Comment.model';
 import { addToDb, deleteOne } from '../src/database/abstraction';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('Comments Controller', () => {
-	let database: Connection | undefined;
-	let app: Express | undefined;
+	let database: Connection;
+	let app = application.listen(3000);
 	const commentBody: Partial<NewComment> = {
 		text: `This content is really amazing!!`,
 	};
@@ -27,13 +25,13 @@ describe('Comments Controller', () => {
 	const baseRoute = '/comments';
 	let header = { authorization: '' };
 	let differentUserHeader = { authorization: '' };
+	let mongod: MongoMemoryServer;
 	let model = commentModel;
 	beforeAll(async () => {
 		try {
-			const { app: application, db } = await initializeApp();
-			database = db;
-			app = application;
-
+			mongod = await MongoMemoryServer.create();
+			const uri = mongod.getUri();
+			database = (await connect(uri)).connection;
 			const newUser = {
 				name: 'Felipe',
 				email: 'felipe@gmail.com',
@@ -73,20 +71,15 @@ describe('Comments Controller', () => {
 				await postService.createPost({ ...newPost, owner: userId })
 			)._id.toString();
 		} catch (error) {
-			logger.error(error);
-			// TODO: should throw an error here too?
+			throw error;
 		}
 	});
 
 	afterAll(async () => {
-		try {
-			if (database) {
-				await database.db.dropDatabase();
-			}
-			await disconnectDB();
-		} catch (error) {
-			logger.error(error);
-		}
+		await database.dropDatabase();
+		await database.close();
+		await mongod.stop();
+		app.close();
 	});
 
 	describe('Token Validation', () => {
@@ -105,16 +98,14 @@ describe('Comments Controller', () => {
 				],
 			};
 
-			if (app) {
-				const res = await postRequest({
-					app,
-					infoSend,
-					route: baseRoute,
-					header: headers,
-				});
-				expectStatus(res, 401);
-				expectResponseBody(res, expectRes);
-			}
+			const res = await postRequest({
+				app,
+				infoSend,
+				route: baseRoute,
+				header: headers,
+			});
+			expectStatus(res, 401);
+			expectResponseBody(res, expectRes);
 		});
 
 		it(`should throw error without auth Token`, async () => {
@@ -126,11 +117,9 @@ describe('Comments Controller', () => {
 				],
 			};
 
-			if (app) {
-				const res = await postRequest({ app, route: baseRoute });
-				expectStatus(res, 401);
-				expectResponseBody(res, expectRes);
-			}
+			const res = await postRequest({ app, route: baseRoute });
+			expectStatus(res, 401);
+			expectResponseBody(res, expectRes);
 		});
 	});
 
@@ -143,17 +132,14 @@ describe('Comments Controller', () => {
 				text: commentBody.text,
 			};
 
-			if (app) {
-				const res = await postRequest({
-					app,
-					infoSend,
-					route,
-					header,
-				});
-
-				expectStatus(res, 201);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await postRequest({
+				app,
+				infoSend,
+				route,
+				header,
+			});
+			expectStatus(res, 201);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it('should throw with invalid postId', async () => {
@@ -170,17 +156,15 @@ describe('Comments Controller', () => {
 				path: 'Validation',
 			};
 
-			if (app) {
-				const res = await postRequest({
-					app,
-					infoSend,
-					route,
-					header,
-				});
+			const res = await postRequest({
+				app,
+				infoSend,
+				route,
+				header,
+			});
 
-				expectStatus(res, 400);
-				expectResponseBody(res, expectedRes);
-			}
+			expectStatus(res, 400);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it('should throw an error when creating a comment without text', async () => {
@@ -199,17 +183,15 @@ describe('Comments Controller', () => {
 				path: 'Validation',
 			};
 
-			if (app) {
-				const res = await postRequest({
-					app,
-					infoSend,
-					route,
-					header,
-				});
+			const res = await postRequest({
+				app,
+				infoSend,
+				route,
+				header,
+			});
 
-				expectStatus(res, 400);
-				expectResponseBody(res, expectedRes);
-			}
+			expectStatus(res, 400);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it('should throw when text is an empty string', async () => {
@@ -227,17 +209,15 @@ describe('Comments Controller', () => {
 				path: 'Validation',
 			};
 
-			if (app) {
-				const res = await postRequest({
-					app,
-					infoSend,
-					route,
-					header,
-				});
+			const res = await postRequest({
+				app,
+				infoSend,
+				route,
+				header,
+			});
 
-				expectStatus(res, 400);
-				expectResponseBody(res, expectedRes);
-			}
+			expectStatus(res, 400);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw error without authToken`, async () => {
@@ -250,11 +230,9 @@ describe('Comments Controller', () => {
 				],
 			};
 
-			if (app) {
-				const res = await postRequest({ app, route });
-				expectStatus(res, 401);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await postRequest({ app, route });
+			expectStatus(res, 401);
+			expectResponseBody(res, expectedRes);
 		});
 	});
 
@@ -273,11 +251,9 @@ describe('Comments Controller', () => {
 				text: comment.text,
 			};
 
-			if (app) {
-				const res = await getRequest({ app, route, header });
-				expectStatus(res, 200);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await getRequest({ app, route, header });
+			expectStatus(res, 200);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw an error getting comment by invalid ID`, async () => {
@@ -298,11 +274,10 @@ describe('Comments Controller', () => {
 				],
 				path: 'Validation',
 			};
-			if (app) {
-				const res = await getRequest({ app, route, header });
-				expectStatus(res, 400);
-				expectResponseBody(res, expectedRes);
-			}
+
+			const res = await getRequest({ app, route, header });
+			expectStatus(res, 400);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw error without authToken`, async () => {
@@ -322,11 +297,9 @@ describe('Comments Controller', () => {
 				],
 			};
 
-			if (app) {
-				const res = await getRequest({ app, route });
-				expectStatus(res, 401);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await getRequest({ app, route });
+			expectStatus(res, 401);
+			expectResponseBody(res, expectedRes);
 		});
 	});
 
@@ -351,11 +324,9 @@ describe('Comments Controller', () => {
 				text: infoSend.text,
 			};
 
-			if (app) {
-				const res = await putRequest({ app, route, infoSend, header });
-				expectStatus(res, 200);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await putRequest({ app, route, infoSend, header });
+			expectStatus(res, 200);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should update comment image`, async () => {
@@ -377,11 +348,9 @@ describe('Comments Controller', () => {
 				image: infoSend.image,
 			};
 
-			if (app) {
-				const res = await putRequest({ app, route, infoSend, header });
-				expectStatus(res, 200);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await putRequest({ app, route, infoSend, header });
+			expectStatus(res, 200);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should update the comment text and the image`, async () => {
@@ -404,11 +373,9 @@ describe('Comments Controller', () => {
 				image: infoSend.image,
 			};
 
-			if (app) {
-				const res = await putRequest({ app, route, infoSend, header });
-				expectStatus(res, 200);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await putRequest({ app, route, infoSend, header });
+			expectStatus(res, 200);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw an error when text is an empty string`, async () => {
@@ -435,11 +402,9 @@ describe('Comments Controller', () => {
 				path: 'Validation',
 			};
 
-			if (app) {
-				const res = await putRequest({ app, route, infoSend, header });
-				expectStatus(res, 400);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await putRequest({ app, route, infoSend, header });
+			expectStatus(res, 400);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw an error when comment isn't found`, async () => {
@@ -468,11 +433,9 @@ describe('Comments Controller', () => {
 				path: 'Update comment',
 			};
 
-			if (app) {
-				const res = await putRequest({ app, route, header, infoSend });
-				expectStatus(res, 400);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await putRequest({ app, route, header, infoSend });
+			expectStatus(res, 400);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw an error when trying to update someone's else comment`, async () => {
@@ -495,16 +458,15 @@ describe('Comments Controller', () => {
 				path: 'Update comment',
 			};
 
-			if (app) {
-				const res = await putRequest({
-					app,
-					route,
-					infoSend,
-					header: differentUserHeader,
-				});
-				expectStatus(res, 401);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await putRequest({
+				app,
+				route,
+				infoSend,
+				header: differentUserHeader,
+			});
+
+			expectStatus(res, 401);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw an error with invalid Id`, async () => {
@@ -529,16 +491,15 @@ describe('Comments Controller', () => {
 				path: 'Validation',
 			};
 
-			if (app) {
-				const res = await putRequest({
-					app,
-					route,
-					infoSend,
-					header: differentUserHeader,
-				});
-				expectStatus(res, 400);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await putRequest({
+				app,
+				route,
+				infoSend,
+				header: differentUserHeader,
+			});
+
+			expectStatus(res, 400);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw error without authToken`, async () => {
@@ -558,11 +519,9 @@ describe('Comments Controller', () => {
 				],
 			};
 
-			if (app) {
-				const res = await putRequest({ app, route });
-				expectStatus(res, 401);
-				expectResponseBody(res, expectRes);
-			}
+			const res = await putRequest({ app, route });
+			expectStatus(res, 401);
+			expectResponseBody(res, expectRes);
 		});
 	});
 
@@ -578,10 +537,8 @@ describe('Comments Controller', () => {
 			)._id;
 			const route = `${baseRoute}/${id}`;
 
-			if (app) {
-				const res = await deleteRequest({ app, route, header });
-				expectStatus(res, 204);
-			}
+			const res = await deleteRequest({ app, route, header });
+			expectStatus(res, 204);
 		});
 
 		it(`should throw an error trying to delete a comment that doesn't exist`, async () => {
@@ -602,11 +559,9 @@ describe('Comments Controller', () => {
 				path: 'Delete comment',
 			};
 
-			if (app) {
-				const res = await deleteRequest({ app, route, header });
-				expectStatus(res, 400);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await deleteRequest({ app, route, header });
+			expectStatus(res, 400);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw an error trying to delete someone's else comments`, async () => {
@@ -624,15 +579,13 @@ describe('Comments Controller', () => {
 				path: 'Delete comment',
 			};
 
-			if (app) {
-				const res = await deleteRequest({
-					app,
-					route,
-					header: differentUserHeader,
-				});
-				expectStatus(res, 401);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await deleteRequest({
+				app,
+				route,
+				header: differentUserHeader,
+			});
+			expectStatus(res, 401);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw an error when trying to delete comment by invalid ID`, async () => {
@@ -652,15 +605,13 @@ describe('Comments Controller', () => {
 				path: 'Validation',
 			};
 
-			if (app) {
-				const res = await deleteRequest({
-					app,
-					route,
-					header,
-				});
-				expectStatus(res, 400);
-				expectResponseBody(res, expectedRes);
-			}
+			const res = await deleteRequest({
+				app,
+				route,
+				header,
+			});
+			expectStatus(res, 400);
+			expectResponseBody(res, expectedRes);
 		});
 
 		it(`should throw error without authToken`, async () => {
@@ -680,11 +631,9 @@ describe('Comments Controller', () => {
 				],
 			};
 
-			if (app) {
-				const res = await deleteRequest({ app, route });
-				expectStatus(res, 401);
-				expectResponseBody(res, expectRes);
-			}
+			const res = await deleteRequest({ app, route });
+			expectStatus(res, 401);
+			expectResponseBody(res, expectRes);
 		});
 	});
 });
