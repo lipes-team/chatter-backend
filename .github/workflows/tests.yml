@@ -4,9 +4,7 @@ on:
     branches:
       - main
       - development
-env:
-  PORT: ${{ secrets.PORT }}
-  EXPIRED: ${{ secrets.EXPIRED }}
+environment: Actions
 jobs:
   build:
     runs-on: ubuntu-latest
