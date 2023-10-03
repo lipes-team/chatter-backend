@@ -8,14 +8,14 @@ import {
 	deleteOne,
 	deleteMany,
 } from '../src/database/abstraction';
-import { userModel } from '../src/models/User.model';
+import { User } from '../src/models/User.model';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('Database Abstraction', () => {
 	let database: Connection;
 	let mongod: MongoMemoryServer;
 
-	const Model = userModel;
+	const Model = User;
 	const userTestData = {
 		name: 'John Doe',
 		password: 'secretpass123',
