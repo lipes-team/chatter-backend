@@ -10,7 +10,7 @@ import {
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
 import { app as application } from '../app';
 import { findOne, find, addToDb, update } from '../src/database/abstraction';
-import { userModel } from '../src/models/User.model';
+import { User } from '../src/models/User.model';
 import { userService } from '../src/services/User.service';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
@@ -26,7 +26,7 @@ describe('User tests', () => {
 			mongod = await MongoMemoryServer.create();
 			const uri = mongod.getUri();
 			database = (await connect(uri)).connection;
-			await userModel.ensureIndexes(); //ensure mongoose validation based on userModel
+			await User.ensureIndexes(); //ensure mongoose validation based on userModel
 
 			let userInfo = {
 				name: 'Jane Doe',
@@ -141,7 +141,7 @@ describe('User tests', () => {
 
 			await userService.createUser(userInfo);
 
-			let savedUser = await findOne(userModel, {
+			let savedUser = await findOne(User, {
 				email: userInfo.email,
 			}).select('+password');
 

@@ -1,4 +1,4 @@
-import { userModel, User } from '../models/User.model';
+import { UserModel, User, UserInferred } from '../models/User.model';
 import {
 	addToDb,
 	findOne,
@@ -13,9 +13,9 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Remover } from '../utils/types';
 
-type Filter = FilterOptions<User>;
-type Update = UpdateOptions<User>;
-type Options = OptionsQuery<User>;
+type Filter = FilterOptions<UserInferred>;
+type Update = UpdateOptions<UserInferred>;
+type Options = OptionsQuery<UserInferred>;
 
 interface UserData {
 	id?: string;
@@ -25,10 +25,10 @@ interface UserData {
 }
 
 class UserService {
-	userModel: typeof userModel;
+	userModel: UserModel;
 
 	constructor() {
-		this.userModel = userModel;
+		this.userModel = User;
 	}
 	async createUser(newUser: UserData) {
 		let hashedPassword = await this.hashPassword(newUser);
@@ -49,7 +49,7 @@ class UserService {
 	}
 
 	async findUser(filter: Filter, options?: Options) {
-		return findOne(userModel, filter, options);
+		return findOne(this.userModel, filter, options);
 	}
 
 	createAuthToken(user: Remover<UserData, 'password'>) {
@@ -66,7 +66,7 @@ class UserService {
 	}
 
 	updateUser(filter: Filter, newUser: Update, options?: Options) {
-		return update(userModel, filter, newUser, {
+		return update(this.userModel, filter, newUser, {
 			new: true,
 			lean: true,
 			...options,
