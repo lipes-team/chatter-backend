@@ -50,7 +50,7 @@ const postSchema = new Schema(
 	},
 	{ timestamps: true }
 );
-// TODO: Change naming for model
+
 type PostInferred = InferSchemaType<typeof postSchema>;
 type PostModel = Model<PostInferred>;
 
