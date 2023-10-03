@@ -4,7 +4,7 @@ on:
     branches:
       - main
       - development
-environment: Actions
+environment: actions_test
 jobs:
   build:
     runs-on: ubuntu-latest
