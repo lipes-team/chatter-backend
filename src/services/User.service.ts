@@ -32,9 +32,11 @@ class UserService {
 	}
 	async createUser(newUser: UserData) {
 		let hashedPassword = await this.hashPassword(newUser);
-		//TODO: update to not change the original object
-		newUser.password = hashedPassword;
-		return addToDb(this.userModel, newUser);
+		const userToCreate = {
+			...newUser,
+			password: hashedPassword,
+		};
+		return addToDb(this.userModel, userToCreate);
 	}
 
 	async hashPassword(newUser: UserData): Promise<string> {
