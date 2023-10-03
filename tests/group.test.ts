@@ -1,13 +1,15 @@
 import { Express } from 'express';
-import { Connection } from 'mongoose';
+import { Connection, Types, Schema } from 'mongoose';
 
 import { initializeApp } from '../app';
 import { disconnectDB } from '../src/database/connection';
-import { groupModel } from '../src/models/Group.model';
+import { Group, GroupInferred, groupModel } from '../src/models/Group.model';
 import { userService } from '../src/services/User.service';
 import { logger } from '../src/utils/logger';
 import { postRequest } from './utils/requestAbstraction';
 import { expectStatus } from './utils/expectAbstractions';
+import { groupService } from '../src/services/Group.service';
+import { User } from '../src/models/User.model';
 
 
 describe('User Services', () => {
@@ -15,6 +17,9 @@ describe('User Services', () => {
     let app: Express | undefined;
     let authToken = "";
     let header = { Authorization: "" };
+    let testUser: User & {
+        _id?: Types.ObjectId,
+    }
 
     beforeAll(async () => {
         try {
@@ -29,7 +34,7 @@ describe('User Services', () => {
                 email: 'uniquejane@email.com',
             };
 
-            await userService.createUser(userInfo);
+            testUser = await userService.createUser(userInfo);
 
             authToken = userService.createAuthToken({
                 name: userInfo.name,
@@ -40,13 +45,25 @@ describe('User Services', () => {
                 Authorization: `Bearer ${authToken}`
             }
 
+
+            let testGroup = await groupService.create({
+                name: "Test Group",
+                description: "Group for testing purposes",
+                users: [
+                    {
+                        user: testUser._id!,
+                        role: "Manager",
+                    }
+                ],
+                chatRoom: "test-chatroom",
+                posts: []
+            })
+
         } catch (error) {
             logger.error(error);
             // TODO: should throw an error here too?
         }
     });
-
-
 
     afterAll(async () => {
         try {
@@ -60,8 +77,8 @@ describe('User Services', () => {
     describe("CONTROLLERS", () => {
         it("Should create a new group", async () => {
             const infoSend = {
-                name: "Test Group",
-                description: "Group for testing purposes",
+                name: "Test Group 2",
+                description: "Group for testing purposes 2",
                 users: [
                     {
                         userRef: "TEST",
@@ -83,7 +100,35 @@ describe('User Services', () => {
 
     })
 
+    describe("SERVICES", () => {
+        it("Testing environment should create a group with a user", async () => {
+            const groupsOfUser = await groupService.getAllByUserId(testUser._id!)
 
+            expect(groupsOfUser).toEqual(
+                expect.arrayContaining(
+                    [
+                        expect.objectContaining(
+                            {
+                                name: "Test Group",
+                                description: "Group for testing purposes",
+                                users:
+                                    expect.arrayContaining(
+                                        [
+                                            expect.objectContaining(
+                                                {
+                                                    user: testUser._id!,
+                                                    role: "Manager",
+                                                }
+                                            )
+                                        ],
+                                    )
+                            }
+                        )
+                    ]
+                )
+            )
+        })
+    })
 
 
 });
