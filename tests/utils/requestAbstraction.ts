@@ -1,15 +1,15 @@
 import request, { Response } from 'supertest';
-import { Express } from 'express';
+import { IncomingMessage, ServerResponse, Server } from 'http';
 
 export type RequestTypes = {
-	app: Express;
-	infoSend: string | object;
+	app: Server<typeof IncomingMessage, typeof ServerResponse>;
+	infoSend?: string | object;
 	route: string;
 	header?: {};
 };
 
 const makeRequest = (
-	app: Express,
+	app: Server<typeof IncomingMessage, typeof ServerResponse>,
 	method: 'get' | 'put' | 'delete' | 'post',
 	{ infoSend, route, header }: RequestTypes
 ): Promise<Response> => {

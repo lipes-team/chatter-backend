@@ -28,28 +28,31 @@ class UserController {
 	) {
 		try {
 			const { name, password, email } = req.body;
-			const user = await userService.findUser({ email }, { projection: "+password" })
+			const user = await userService.findUser(
+				{ email },
+				{ projection: '+password' }
+			);
 
 			if (user === null) {
 				throw {
-					message: "Email and/or password incorrect",
-					status: 400
+					message: 'Email and/or password incorrect',
+					status: 400,
 				};
 			}
 
-			const passwordValid = await userService.compareHashedPassword(password, user.password)
+			const passwordValid = await userService.compareHashedPassword(
+				password,
+				user.password
+			);
 
 			if (!passwordValid) {
 				throw {
-					message: "Email and/or password incorrect",
-					status: 400
-				}
+					message: 'Email and/or password incorrect',
+					status: 400,
+				};
 			}
 
-			const authToken = userService.createAuthToken({
-				name,
-				email,
-			});
+			const authToken = userService.createAuthToken(user);
 
 			return res.status(200).json({ authToken: authToken });
 		} catch (error: any) {
@@ -64,16 +67,15 @@ class UserController {
 		next: RouteOpts['next']
 	) {
 		try {
-
-			const { id, name, email, } = req.payload!
+			const { id, name, email } = req.payload!;
 
 			const newUser = {
 				name: req.body.name,
 				password: req.body.password,
-				email: req.body.email
-			}
+				email: req.body.email,
+			};
 
-			const updatedUser = await userService.updateUser({ id }, newUser)
+			const updatedUser = await userService.updateUser({ id }, newUser);
 
 			return res.status(200).json(updatedUser);
 		} catch (error: any) {

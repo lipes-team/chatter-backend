@@ -1,18 +1,46 @@
-import { Schema, model, InferSchemaType, Model } from 'mongoose';
-
-import { OptionalArrays, RequiredArrays } from '../database/abstraction';
+import { Schema, model, InferSchemaType, Model, Types } from 'mongoose';
 import { Remover, Timestamps } from '../utils/types';
 
 const postSchema = new Schema(
 	{
+		title: {
+			type: String,
+			required: true,
+		},
 		owner: {
 			type: Schema.Types.ObjectId,
 			ref: 'User',
 		},
-		postInfo: {
-			type: [Schema.Types.ObjectId],
-			ref: 'PostBody',
+		activePost: {
+			text: {
+				type: String,
+				required: true,
+			},
+			image: String,
 		},
+		status: {
+			type: String,
+			enum: ['active', 'pending', 'inReview'],
+			default: 'pending',
+			required: false,
+		},
+		editPropose: {
+			text: {
+				type: String,
+			},
+			image: String,
+		},
+		toUpdate: {
+			type: Boolean,
+			default: false,
+			required: false,
+		},
+		history: [
+			{
+				text: String,
+				image: String,
+			},
+		],
 		comments: {
 			type: [Schema.Types.ObjectId],
 			ref: 'Comments',
@@ -21,13 +49,16 @@ const postSchema = new Schema(
 	{ timestamps: true }
 );
 
-type Post = InferSchemaType<typeof postSchema>;
-type PostModel = Model<Post>;
+type PostInferred = InferSchemaType<typeof postSchema>;
+type PostModel = Model<PostInferred>;
 
-type OptionalPost = OptionalArrays<Post, 'comments'>;
-type Required = RequiredArrays<OptionalPost, 'postInfo'>;
-type NewPost = Remover<Required, keyof Timestamps>;
+type NewPost = Remover<
+	PostInferred,
+	keyof Timestamps | 'owner' | 'toUpdate' | 'status'
+> & {
+	owner: string | Types.ObjectId;
+};
 
-const postModel = model('Post', postSchema);
+const Post = model('Post', postSchema);
 
-export { postModel, Post, PostModel, NewPost };
+export { Post, PostInferred, PostModel, NewPost };

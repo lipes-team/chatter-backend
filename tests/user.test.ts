@@ -1,32 +1,30 @@
-import { Connection } from 'mongoose';
-import { Express } from 'express';
+import { Connection, connect } from 'mongoose';
 
-import { disconnectDB } from '../src/database/connection';
 import {
 	getRequest,
 	postRequest,
 	putRequest,
 	deleteRequest,
-	RequestTypes,
 } from './utils/requestAbstraction';
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
-import { logger } from '../src/utils/logger';
-import { initializeApp } from '../app';
+import { app as application } from '../app';
 import { findOne, find, addToDb, update } from '../src/database/abstraction';
-import { userModel } from '../src/models/User.model';
+import { User } from '../src/models/User.model';
 import { userService } from '../src/services/User.service';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
-describe('User Services', () => {
-	let database: Connection | undefined;
-	let app: Express | undefined;
-	let authToken = "";
-
+describe('User tests', () => {
+	let PORT = Number(process.env.PORT!);
+	let database: Connection;
+	let app = application.listen(PORT);
+	let authToken = '';
+	let mongod: MongoMemoryServer;
 	beforeAll(async () => {
 		try {
-			const { app: application, db } = await initializeApp();
-			database = db;
-			app = application;
-			await userModel.ensureIndexes();  //ensure mongoose validation based on userModel
+			mongod = await MongoMemoryServer.create();
+			const uri = mongod.getUri();
+			database = (await connect(uri)).connection;
+			await User.ensureIndexes(); //ensure mongoose validation based on userModel
 
 			let userInfo = {
 				name: 'Jane Doe',
@@ -38,189 +36,182 @@ describe('User Services', () => {
 
 			authToken = userService.createAuthToken({
 				name: userInfo.name,
-				email: userInfo.email
-			})
-
+				email: userInfo.email,
+			});
 		} catch (error) {
-			logger.error(error);
-			// TODO: should throw an error here too?
+			throw error;
 		}
 	});
 
 	afterAll(async () => {
-		try {
-			await database?.db.dropDatabase();
-			await disconnectDB();
-		} catch (error) {
-			logger.error(error);
-		}
+		await database.dropDatabase();
+		await database.close();
+		await mongod.stop();
+		app.close();
 	});
 
-	it('CONTROLER: throw error message if user signup data invalid', async () => {
-		const infoSend = {
-			name: 'John Doe',
-			password: 'abc1', //invalid password
-			email: 'johndoe@email.com',
-		};
-		const route = '/user/signup';
-		const error = {
-			errors: [
-				{
-					message:
-						'Invalid password, must contain at least one uppercase letter, one lowercase letter, one number, and is at least 8 characters long',
-					path: ['body', 'password'],
-				},
-			],
-		};
+	describe('User controllers', () => {
+		it('should throw error message if user signup data invalid', async () => {
+			const infoSend = {
+				name: 'John Doe',
+				password: 'abc1', //invalid password
+				email: 'johndoe@email.com',
+			};
+			const route = '/user/signup';
+			const error = {
+				errors: [
+					{
+						message:
+							'Invalid password, must contain at least one uppercase letter, one lowercase letter, one number, and is at least 8 characters long',
+						path: ['body', 'password'],
+					},
+				],
+			};
 
-		if (app) {
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 400);
 			expectResponseBody(res, error);
-		}
-	});
+		});
 
-	it('CONTROLER (signup): No error if user signup data is valid', async () => {
-		const infoSend = {
-			name: 'John Doe',
-			password: 'TestTest123', //valid password
-			email: 'johndoe@email.com',
-		};
-		const route = '/user/signup';
-		if (app) {
+		it('should create an user', async () => {
+			const infoSend = {
+				name: 'John Doe',
+				password: 'TestTest123', //valid password
+				email: 'johndoe@email.com',
+			};
+			const route = '/user/signup';
+
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 201);
-		}
-	});
+		});
 
-	it('CONTROLER (signup): Respond with 400 and simple message if email is not unique', async () => {
-		const infoSend = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'uniquejane@email.com',
-		};
-		const route = '/user/signup';
+		it(`should throw an error when email isn't unique`, async () => {
+			const infoSend = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'uniquejane@email.com',
+			};
+			const route = '/user/signup';
 
-		if (app) {
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 400);
-		}
-	});
-	it('CONTROLER (login): Should respond 200 if user logins with valid info', async () => {
-		const infoSend = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'uniquejane@email.com',
-		};
-		const route = '/user/login';
+		});
 
-		if (app) {
+		it('should login the user', async () => {
+			const infoSend = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'uniquejane@email.com',
+			};
+			const route = '/user/login';
+
 			const res = await postRequest({ app, infoSend, route });
 			expectStatus(res, 200);
-		}
-	});
+		});
 
-	it("CONTROLLER (Update): Should respond with 200", async () => {
-		const infoSend = {
-			name: "Updated Jane Doe",
-			password: "TestUpdate123",
-			email: "updatejanedoe@email.com"
-		};
+		it('should update user information', async () => {
+			const infoSend = {
+				name: 'Updated Jane Doe',
+				password: 'TestUpdate123',
+				email: 'updatejanedoe@email.com',
+			};
 
-		const route = '/user/update';
-		const header = {
-			Authorization: `Bearer ${authToken}`
-		}
+			const route = '/user/update';
+			const header = {
+				Authorization: `Bearer ${authToken}`,
+			};
 
-		if (app) {
 			const res = await postRequest({ app, infoSend, route, header });
 			expectStatus(res, 200);
-		}
-	})
+		});
+	});
 
-	it('SERVICE: Password in db should be hashed and match original password', async () => {
-		const userInfo = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'janedoe@email.com',
-		};
+	describe('User services', () => {
+		it('should check password in db be hashed and match original password', async () => {
+			const userInfo = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'janedoe@email.com',
+			};
 
-		// shallow copy because .createUser changes the original
-		const originalUserInfo = { ...userInfo };
+			// shallow copy because .createUser changes the original
+			const originalUserInfo = { ...userInfo };
 
-		await userService.createUser(userInfo);
+			await userService.createUser(userInfo);
 
-		let savedUser = await findOne(userModel, { email: userInfo.email }).select(
-			'+password'
-		);
+			let savedUser = await findOne(User, {
+				email: userInfo.email,
+			}).select('+password');
 
-		if (savedUser?.password) {
-			expect(savedUser.password).not.toEqual(originalUserInfo.password);
+			if (savedUser?.password) {
+				expect(savedUser.password).not.toEqual(originalUserInfo.password);
 
-			let isHashed = await userService.compareHashedPassword(
-				originalUserInfo.password,
-				savedUser.password
+				let isHashed = await userService.compareHashedPassword(
+					originalUserInfo.password,
+					savedUser.password
+				);
+
+				expect(isHashed).toBe(true);
+			}
+		});
+
+		it('should check if user exists in DB', async () => {
+			const userInfo = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'janedoe@email.com',
+			};
+			const userInDB = await userService.findUser({ email: userInfo.email });
+
+			expect(userInDB).not.toBeNull();
+		});
+
+		it('should create a JWToken', async () => {
+			let authToken;
+
+			const userInfo = {
+				name: 'Jane Doe',
+				password: 'TestTest123', //valid password
+				email: 'janedoe@email.com',
+			};
+
+			let userInDB = await userService.findUser({ email: userInfo.email });
+
+			if (userInDB) {
+				authToken = userService.createAuthToken;
+			}
+
+			expect(authToken).toBeDefined();
+		});
+
+		it('should update user info in db', async () => {
+			const oldInfo = {
+				name: 'Jane Doe',
+				password: 'TestTest123',
+				email: 'uniquejane@email.com',
+			};
+
+			const newInfo = {
+				name: 'Updated Jane Doe',
+				password: 'TestUpdate123',
+				email: 'updatejanedoe@email.com',
+			};
+
+			newInfo.password = await userService.hashPassword(newInfo);
+
+			const oldUser = await userService.findUser(
+				{ email: oldInfo.email },
+				{ projection: '+password' }
+			);
+			const newUser = await userService.updateUser(
+				{ email: oldInfo.email },
+				{ ...newInfo },
+				{ projection: '+password' }
 			);
 
-			expect(isHashed).toBe(true);
-		}
+			if (oldUser) {
+				expect(newUser).not.toMatchObject(oldUser);
+			}
+		});
 	});
-
-	it('SERVICE: should check if user exists in DB', async () => {
-		const userInfo = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'janedoe@email.com',
-		};
-		const userInDB = await userService.findUser(
-			{ email: userInfo.email }
-		);
-
-		expect(userInDB).not.toBeNull();
-	});
-
-	it('SERVICE: Should create a JWToken', async () => {
-		let authToken;
-
-		const userInfo = {
-			name: 'Jane Doe',
-			password: 'TestTest123', //valid password
-			email: 'janedoe@email.com',
-		};
-
-		let userInDB = await userService.findUser(
-			{ email: userInfo.email },
-		);
-
-		if (userInDB) {
-			authToken = userService.createAuthToken
-		}
-
-		expect(authToken).toBeDefined();
-	});
-
-
-	it("SERVICE (Update): Should update user info in db", async () => {
-		const oldInfo = {
-			name: 'Jane Doe',
-			password: 'TestTest123',
-			email: 'uniquejane@email.com',
-		};
-
-		const newInfo = {
-			name: "Updated Jane Doe",
-			password: "TestUpdate123",
-			email: "updatejanedoe@email.com"
-		};
-
-		newInfo.password = await userService.hashPassword(newInfo)
-
-		const oldUser = await userService.findUser({ email: oldInfo.email }, { projection: "+password" });
-		const newUser = await userService.updateUser({ email: oldInfo.email }, { ...newInfo }, { projection: "+password" });
-
-		if (oldUser) {
-			expect(newUser).not.toMatchObject(oldUser)
-		}
-	})
-
 });

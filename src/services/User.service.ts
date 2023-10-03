@@ -1,11 +1,11 @@
-import { userModel, User } from '../models/User.model';
+import { UserModel, User, UserInferred } from '../models/User.model';
 import {
 	addToDb,
 	findOne,
 	FilterOptions,
 	UpdateOptions,
 	OptionsQuery,
-	update
+	update,
 } from '../database/abstraction';
 
 import bcrypt from 'bcrypt';
@@ -13,9 +13,9 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Remover } from '../utils/types';
 
-type Filter = FilterOptions<User>;
-type Update = UpdateOptions<User>;
-type Options = OptionsQuery<User>;
+type Filter = FilterOptions<UserInferred>;
+type Update = UpdateOptions<UserInferred>;
+type Options = OptionsQuery<UserInferred>;
 
 interface UserData {
 	id?: string;
@@ -25,49 +25,51 @@ interface UserData {
 }
 
 class UserService {
-	userModel: typeof userModel;
+	userModel: UserModel;
 
 	constructor() {
-		this.userModel = userModel;
+		this.userModel = User;
 	}
 	async createUser(newUser: UserData) {
 		let hashedPassword = await this.hashPassword(newUser);
-		newUser.password = hashedPassword;
-		return addToDb(this.userModel, newUser);
+		const userToCreate = {
+			...newUser,
+			password: hashedPassword,
+		};
+		return addToDb(this.userModel, userToCreate);
 	}
 
-	async hashPassword(newUser: UserData): Promise<string> {
-
-		return bcrypt.hash(newUser.password, 10)
-
+	async hashPassword(newUser: UserData) {
+		return bcrypt.hash(newUser.password, 12);
 	}
 
-	async compareHashedPassword(
-		plainPassword: string,
-		hashPassword: string
-	): Promise<boolean> {
-		return bcrypt.compare(plainPassword, hashPassword)
+	async compareHashedPassword(plainPassword: string, hashPassword: string) {
+		return bcrypt.compare(plainPassword, hashPassword);
 	}
 
 	async findUser(filter: Filter, options?: Options) {
-		return findOne(userModel, filter, options)
+		return findOne(this.userModel, filter, options);
 	}
 
-	createAuthToken(user: Remover<UserData, "password">) {
-		let authToken
+	createAuthToken(user: Remover<UserData, 'password'>) {
+		let authToken;
 		const jwtSecret: string = process.env.JWT_SECRET || 'd3f4ults3cr3t';
 
 		const { id, name, email } = user;
 		const payload = { id, name, email };
 
-		return authToken = jwt.sign(payload, jwtSecret, {
+		return (authToken = jwt.sign(payload, jwtSecret, {
 			algorithm: 'HS256',
 			expiresIn: '6h',
-		});
+		}));
 	}
 
 	updateUser(filter: Filter, newUser: Update, options?: Options) {
-		return update(userModel, filter, newUser, { new: true, lean: true, ...options })
+		return update(this.userModel, filter, newUser, {
+			new: true,
+			lean: true,
+			...options,
+		});
 	}
 }
 
