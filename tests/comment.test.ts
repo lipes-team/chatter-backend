@@ -8,11 +8,11 @@ import {
 } from './utils/requestAbstraction';
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
 import { app as application } from '../app';
-import { postService } from '../src/services/Post.service';
 import { userService } from '../src/services/User.service';
 import { NewComment, Comment } from '../src/models/Comment.model';
 import { addToDb, deleteOne } from '../src/database/abstraction';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { Post } from '../src/models/Post.model';
 
 describe('Comments Controller', () => {
 	let database: Connection;
@@ -46,8 +46,8 @@ describe('Comments Controller', () => {
 			};
 
 			const [firstUser] = await Promise.all([
-				userService.createUser({ ...newUser }),
-				userService.createUser({ ...differentUser }),
+				userService.createUser(newUser),
+				userService.createUser(differentUser),
 			]);
 			userId = firstUser._id.toString();
 
@@ -67,9 +67,9 @@ describe('Comments Controller', () => {
 				},
 				title: 'Mastering the Art of Asynchronous JavaScript',
 			};
-			//TODO: Check if should change to model instead of service
+
 			postId = (
-				await postService.createPost({
+				await Post.create({
 					...newPost,
 					owner: userId,
 					comments: [],

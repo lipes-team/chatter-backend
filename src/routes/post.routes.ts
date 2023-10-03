@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { postController } from '../controllers/Post.controller';
 import { validateSchema } from '../middlewares/validateSchema';
 import { createPostSchema, updatePostSchema } from '../validation/post.schema';
-import { isAuthenticated } from '../middlewares/isAuthenticated';
 import { testIdSchema } from '../validation/id.schema';
 
 const router = Router();

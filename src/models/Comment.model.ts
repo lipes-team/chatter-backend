@@ -1,5 +1,4 @@
 import { InferSchemaType, Model, Schema, Types, model } from 'mongoose';
-import { Remover, Timestamps } from '../utils/types';
 
 const commentSchema = new Schema(
 	{

@@ -5,7 +5,6 @@ import {
 	postRequest,
 	putRequest,
 	deleteRequest,
-	RequestTypes,
 } from './utils/requestAbstraction';
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
 import { app as application } from '../app';
@@ -14,7 +13,6 @@ import { User } from '../src/models/User.model';
 import { userService } from '../src/services/User.service';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
-// TODO: refactor to organize the tests inside different describes
 describe('User tests', () => {
 	let PORT = process.env.PORT!;
 	let database: Connection;
