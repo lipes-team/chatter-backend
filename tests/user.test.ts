@@ -1,7 +1,5 @@
-import { Connection } from 'mongoose';
-import { Express } from 'express';
+import { Connection, connect } from 'mongoose';
 
-import { disconnectDB } from '../src/database/connection';
 import {
 	getRequest,
 	postRequest,
@@ -10,23 +8,23 @@ import {
 	RequestTypes,
 } from './utils/requestAbstraction';
 import { expectResponseBody, expectStatus } from './utils/expectAbstractions';
-import { logger } from '../src/utils/logger';
-import { initializeApp } from '../app';
+import { app as application } from '../app';
 import { findOne, find, addToDb, update } from '../src/database/abstraction';
 import { userModel } from '../src/models/User.model';
 import { userService } from '../src/services/User.service';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 // TODO: refactor to organize the tests inside different describes
 describe('User tests', () => {
-	let database: Connection | undefined;
-	let app: Express | undefined;
+	let database: Connection;
+	let app = application.listen(3000);
 	let authToken = '';
-
+	let mongod: MongoMemoryServer;
 	beforeAll(async () => {
 		try {
-			const { app: application, db } = await initializeApp();
-			database = db;
-			app = application;
+			mongod = await MongoMemoryServer.create();
+			const uri = mongod.getUri();
+			database = (await connect(uri)).connection;
 			await userModel.ensureIndexes(); //ensure mongoose validation based on userModel
 
 			let userInfo = {
@@ -42,18 +40,15 @@ describe('User tests', () => {
 				email: userInfo.email,
 			});
 		} catch (error) {
-			logger.error(error);
-			// TODO: should throw an error here too?
+			throw error;
 		}
 	});
 
 	afterAll(async () => {
-		try {
-			await database?.db.dropDatabase();
-			await disconnectDB();
-		} catch (error) {
-			logger.error(error);
-		}
+		await database.dropDatabase();
+		await database.close();
+		await mongod.stop();
+		app.close();
 	});
 
 	describe('User controllers', () => {
@@ -74,11 +69,9 @@ describe('User tests', () => {
 				],
 			};
 
-			if (app) {
-				const res = await postRequest({ app, infoSend, route });
-				expectStatus(res, 400);
-				expectResponseBody(res, error);
-			}
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
+			expectResponseBody(res, error);
 		});
 
 		it('should create an user', async () => {
@@ -88,10 +81,9 @@ describe('User tests', () => {
 				email: 'johndoe@email.com',
 			};
 			const route = '/user/signup';
-			if (app) {
-				const res = await postRequest({ app, infoSend, route });
-				expectStatus(res, 201);
-			}
+
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 201);
 		});
 
 		it(`should throw an error when email isn't unique`, async () => {
@@ -102,10 +94,8 @@ describe('User tests', () => {
 			};
 			const route = '/user/signup';
 
-			if (app) {
-				const res = await postRequest({ app, infoSend, route });
-				expectStatus(res, 400);
-			}
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 400);
 		});
 
 		it('should login the user', async () => {
@@ -116,10 +106,8 @@ describe('User tests', () => {
 			};
 			const route = '/user/login';
 
-			if (app) {
-				const res = await postRequest({ app, infoSend, route });
-				expectStatus(res, 200);
-			}
+			const res = await postRequest({ app, infoSend, route });
+			expectStatus(res, 200);
 		});
 
 		it('should update user information', async () => {
@@ -134,10 +122,8 @@ describe('User tests', () => {
 				Authorization: `Bearer ${authToken}`,
 			};
 
-			if (app) {
-				const res = await postRequest({ app, infoSend, route, header });
-				expectStatus(res, 200);
-			}
+			const res = await postRequest({ app, infoSend, route, header });
+			expectStatus(res, 200);
 		});
 	});
 
