@@ -1,32 +1,33 @@
-import { Express } from 'express';
-import { Connection, Types, Schema } from 'mongoose';
-
-import { initializeApp } from '../app';
+import { app as application } from '../app';
+import { Connection, Types, connect } from 'mongoose';
 import { disconnectDB } from '../src/database/connection';
-import { Group, GroupInferred, groupModel } from '../src/models/Group.model';
+import { Group, GroupModel } from '../src/models/Group.model';
 import { userService } from '../src/services/User.service';
 import { logger } from '../src/utils/logger';
 import { postRequest } from './utils/requestAbstraction';
 import { expectStatus } from './utils/expectAbstractions';
 import { groupService } from '../src/services/Group.service';
-import { User } from '../src/models/User.model';
+import { UserInferred } from '../src/models/User.model';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 
 describe('User Services', () => {
-    let database: Connection | undefined;
-    let app: Express | undefined;
+    let database: Connection;
+    let app = application
+    let mongod: MongoMemoryServer;
+
     let authToken = "";
     let header = { Authorization: "" };
-    let testUser: User & {
+    let testUser: UserInferred & {
         _id?: Types.ObjectId,
     }
 
     beforeAll(async () => {
         try {
-            const { app: application, db } = await initializeApp();
-            database = db;
-            app = application;
-            await groupModel.ensureIndexes();   //ensure mongoose validation based on userModel
+            mongod = await MongoMemoryServer.create();
+            const uri = mongod.getUri();
+            database = (await connect(uri)).connection;
+            await Group.ensureIndexes();
 
             let userInfo = {
                 name: 'Jane Doe',
@@ -66,12 +67,9 @@ describe('User Services', () => {
     });
 
     afterAll(async () => {
-        try {
-            await database?.db.dropDatabase();
-            await disconnectDB();
-        } catch (error) {
-            logger.error(error);
-        }
+        await database.dropDatabase();
+        await database.close();
+        await mongod.stop();
     });
 
     describe("CONTROLLERS", () => {
@@ -91,11 +89,9 @@ describe('User Services', () => {
 
             const route = "/group/create";
 
-            if (app) {
-                const res = await postRequest({ app, infoSend, route, header });
-                expectStatus(res, 201);
-            }
 
+            const res = await postRequest({ app, infoSend, route, header });
+            expectStatus(res, 201);
         })
 
     })
