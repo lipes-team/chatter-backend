@@ -1,24 +1,24 @@
-import { ObjectId, Types } from "mongoose";
+import { Types } from "mongoose";
 import { addToDb, find, findOne } from "../database/abstraction";
-import { Group, groupModel } from "../models/Group.model";
+import { Group, GroupModel, NewGroup } from "../models/Group.model";
 
 class GroupService {
-    groupModel: typeof groupModel
+    GroupModel: GroupModel
 
     constructor() {
-        this.groupModel = groupModel
+        this.GroupModel = Group;
     }
 
-    async create(newGroup: Group) {
-        return addToDb(this.groupModel, newGroup)
+    async create(newGroup: NewGroup) {
+        return addToDb(this.GroupModel, newGroup)
     }
 
     async getById(groupId: string) {
-        return findOne(this.groupModel, { id: groupId })
+        return findOne(this.GroupModel, { id: groupId })
     }
 
     async getAllByUserId(id: Types.ObjectId) {
-        const groups = await find(this.groupModel, { "users.user": id })
+        const groups = await find(this.GroupModel, { "users.user": id })
 
         return groups ? groups : "No groups found for this user"
     }

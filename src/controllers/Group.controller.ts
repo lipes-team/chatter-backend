@@ -1,6 +1,6 @@
 import { RouteOpts } from "../utils/types";
 import { groupService } from './../services/Group.service';
-import { Group } from "../models/Group.model";
+import { Group, GroupModel, NewGroup } from "../models/Group.model";
 import { Types } from "mongoose";
 import { findOne } from "../database/abstraction";
 
@@ -16,7 +16,7 @@ class GroupController {
 
             const { id } = req.payload!
 
-            const newGroup: Group = {
+            const newGroup: NewGroup = {
                 name,
                 description,
                 users: [
@@ -36,6 +36,7 @@ class GroupController {
         } catch (error: any) {
             error.path = "Create new group";
             error.status = 400;
+            next(error);
         }
     }
 

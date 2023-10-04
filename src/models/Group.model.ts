@@ -49,13 +49,15 @@ const groupSchema = new Schema(
 
 type GroupInferred = InferSchemaType<typeof groupSchema>
 
-type Group = Remover<GroupInferred, "users" | "createdAt" | "updatedAt"> & {
+type NewGroup = Remover<GroupInferred, "users" | "createdAt" | "updatedAt"> & {
     users: Array<{
         user: String | Types.ObjectId;
         role: "Manager" | "Moderator" | "Veteran" | "New user"
     }>
 }
 
-const groupModel = model<GroupInferred>("Group", groupSchema)
+type GroupModel = Model<GroupInferred>
 
-export { groupModel, GroupInferred, Group }
+const Group = model<GroupInferred>("Group", groupSchema)
+
+export { GroupModel, GroupInferred, Group, NewGroup }
