@@ -1,5 +1,5 @@
 import { Connection, connect } from 'mongoose';
-
+import { Express } from 'express';
 import {
 	postRequest,
 	putRequest,
@@ -12,9 +12,8 @@ import { postService } from '../src/services/Post.service';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('Posts Controller', () => {
-	let PORT = Number(process.env.PORT!);
 	let database: Connection;
-	let app = application.listen(PORT);
+	let app: Express = application;
 	let mongod: MongoMemoryServer;
 	const postBody = {
 		activePost: {
@@ -88,7 +87,6 @@ describe('Posts Controller', () => {
 		await database.dropDatabase();
 		await database.close();
 		await mongod.stop();
-		app.close();
 	});
 
 	// ==================== CREATE POST TESTS ====================

@@ -1,5 +1,5 @@
 import { Connection, connect } from 'mongoose';
-
+import { Express } from 'express';
 import {
 	postRequest,
 	putRequest,
@@ -16,8 +16,7 @@ import { Post } from '../src/models/Post.model';
 
 describe('Comments Controller', () => {
 	let database: Connection;
-	let PORT = Number(process.env.PORT!);
-	let app = application.listen(PORT);
+	let app: Express = application;
 	const commentBody: Partial<NewComment> = {
 		text: `This content is really amazing!!`,
 	};
@@ -85,7 +84,6 @@ describe('Comments Controller', () => {
 		await database.dropDatabase();
 		await database.close();
 		await mongod.stop();
-		app.close();
 	});
 
 	describe('Token Validation', () => {
